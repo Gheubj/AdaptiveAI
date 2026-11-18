@@ -121,3 +121,15 @@
   the unchanged v0.1.0 routing engine.
 - Performed no real-source ingestion, model inference, training, network pilot, paid API call, or
   model download. Phase 6B is documented only as a gated proposal.
+
+## 2026-11-18 — Phase 6B external evidence pilot
+
+- Audited the official Hugging Face dataset leaderboard API and SWE-bench Verified semantics.
+- Made two bounded anonymous metadata requests totaling 119,760 bytes: schema inspection and the
+  adapter pilot. No task data, outputs, trajectories, or weights were downloaded.
+- The pilot accepted 20 of 78 advertised rows, preserving original percent scores and complete
+  provenance. All 20 revisions and identities remain unresolved and all rows were unverified.
+- Stored the immutable snapshot and evidence SQLite database outside Git; permission-aware public
+  export denies every record because result redistribution is not explicitly licensed.
+- Added mocked/offline tests, opt-in live integration, conservative comparison/profile queries, and
+  CLI/example workflows. Phase 6C was not started.

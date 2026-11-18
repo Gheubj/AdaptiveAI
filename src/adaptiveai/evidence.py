@@ -47,6 +47,9 @@ class EvidenceRecord(BaseModel):
     source_id: str
     source_version: str | None = None
     source_uri: str | None = None
+    source_record_id: str | None = None
+    source_model_id: str | None = None
+    evaluation_date: datetime | None = None
     retrieved_at: datetime
     subject: EvaluationSubject
     system_kind: SystemKind

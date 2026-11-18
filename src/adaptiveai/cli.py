@@ -85,6 +85,25 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument("--registry", type=Path, default=Path("data/local_model_registry.json"))
     command.add_argument("--max-tokens", type=int, default=64)
     command.add_argument("--timeout", type=float, default=120)
+    intelligence = sub.add_parser("intelligence")
+    intelligence_sub = intelligence.add_subparsers(dest="intelligence_command", required=True)
+    intelligence_sub.add_parser("sources")
+    intelligence_sub.add_parser("permissions")
+    command = intelligence_sub.add_parser("import")
+    command.add_argument("--live", action="store_true")
+    command.add_argument("--snapshot", type=Path)
+    command.add_argument("--store", type=Path, default=Path("data/evidence/evidence.sqlite3"))
+    command.add_argument("--cache-dir", type=Path, default=Path("data/external_cache/phase6b"))
+    command.add_argument("--max-results", type=int, default=20)
+    command.add_argument("--dry-run", action="store_true")
+    command = intelligence_sub.add_parser("evidence")
+    command.add_argument("--store", type=Path, default=Path("data/evidence/evidence.sqlite3"))
+    command.add_argument("--source-model-id")
+    command.add_argument("--benchmark")
+    command = intelligence_sub.add_parser("compare")
+    command.add_argument("left_source_model_id")
+    command.add_argument("right_source_model_id")
+    command.add_argument("--store", type=Path, default=Path("data/evidence/evidence.sqlite3"))
     return root
 
 
@@ -93,7 +112,72 @@ def main(argv: list[str] | None = None) -> int:
     settings = Settings()
     product_config = load_product_config(args.config)
     configure_logging(product_config.log_level)
-    if args.command == "import-archive":
+    if args.command == "intelligence":
+        from adaptiveai.evidence_comparison import compare_models
+        from adaptiveai.evidence_store import EvidenceStore
+        from adaptiveai.external_intelligence import write_private_snapshot
+        from adaptiveai.hf_benchmark import (
+            SOURCE_ID,
+            SOURCE_URL,
+            HuggingFaceLimits,
+            HuggingFaceSWEVerifiedAdapter,
+            swe_bench_permissions,
+        )
+
+        if args.intelligence_command == "sources":
+            print(json.dumps([{"source_id": SOURCE_ID, "url": SOURCE_URL}], indent=2))
+        elif args.intelligence_command == "permissions":
+            print(swe_bench_permissions().model_dump_json(indent=2))
+        elif args.intelligence_command == "import":
+            if args.live == bool(args.snapshot):
+                raise ValueError("choose exactly one of --live or --snapshot")
+            adapter = HuggingFaceSWEVerifiedAdapter(
+                HuggingFaceLimits(
+                    max_results=args.max_results,
+                    total_request_limit=1,
+                    retry_limit=0,
+                    offline=not args.live,
+                )
+            )
+            raw = adapter.fetch() if args.live else args.snapshot.read_bytes()
+            retrieved_at = None
+            if args.snapshot:
+                manifest_path = args.snapshot.with_suffix(".manifest.json")
+                if manifest_path.exists():
+                    from adaptiveai.hf_benchmark import SnapshotManifest
+
+                    manifest = SnapshotManifest.model_validate_json(manifest_path.read_text())
+                    retrieved_at = manifest.retrieved_at
+            result = adapter.import_bytes(raw, retrieved_at=retrieved_at)
+            with EvidenceStore(args.store) as store:
+                update = store.ingest(result.records, dry_run=args.dry_run)
+            paths = (None, None)
+            if not args.dry_run:
+                paths = write_private_snapshot(result, args.cache_dir)
+            print(
+                json.dumps(
+                    {
+                        "manifest": result.manifest.model_dump(mode="json"),
+                        "update": update.__dict__,
+                        "diagnostics": [item.model_dump() for item in result.diagnostics],
+                        "snapshot": [str(path) if path else None for path in paths],
+                    },
+                    indent=2,
+                    default=str,
+                )
+            )
+        elif args.intelligence_command == "evidence":
+            with EvidenceStore(args.store) as store:
+                records = store.query(
+                    source_model_id=args.source_model_id, benchmark=args.benchmark
+                )
+            print(json.dumps([record.model_dump(mode="json") for record in records], indent=2))
+        elif args.intelligence_command == "compare":
+            with EvidenceStore(args.store) as store:
+                left = store.query(source_model_id=args.left_source_model_id)
+                right = store.query(source_model_id=args.right_source_model_id)
+            print(compare_models(left, right).model_dump_json(indent=2))
+    elif args.command == "import-archive":
         from adaptiveai.io import import_archive
 
         path, manifest = import_archive(

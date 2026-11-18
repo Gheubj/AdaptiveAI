@@ -42,6 +42,8 @@ exclude = [
   "/data/models/**",
   "/data/processed/**",
   "/data/catalog/**",
+  "/data/external_cache/**",
+  "/data/evidence/**",
   "/vendor/**",
   "/reports/**",
   "/planning/**",
@@ -56,6 +58,7 @@ testpaths = ["tests"]
 markers = [
   "real_data: optional integration test requiring ADAPTIVEAI_REAL_ARCHIVE",
   "real_local: optional llama.cpp smoke test requiring ADAPTIVEAI_REAL_LOCAL=1",
+  "live_hf: optional bounded Hugging Face metadata test requiring ADAPTIVEAI_LIVE_HF=1",
 ]
 
 [tool.ruff]

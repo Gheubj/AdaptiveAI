@@ -4,6 +4,15 @@ Updated: 2026-11-18 (Phase 6A working branch)
 
 ## Current status
 
+Phase 6B is implemented locally on top of Phase 6A commit `6bedc34`. One bounded anonymous import
+used the official Hugging Face leaderboard API for SWE-bench Verified: 59,880 bytes, 78 source rows,
+20 accepted under the configured limit, zero malformed rows, 20 unresolved identities, 20 unknown
+revisions, and zero independently verified records. Raw/normalized records remain in ignored local
+storage because redistribution permission is unknown. No routing claim, paid API, inference, model
+download, push, tag, or release was made. Final verification passed with 90 tests, three expected
+opt-in skips, 65% whole-package coverage, clean Ruff/format, successful package builds, clean archive
+inspection, and clean-target CLI/module imports.
+
 Phase 6A is implemented on the unpublished `codex/phase6a` branch as an additive model-intelligence
 foundation. It adds exact identity and revision semantics, typed evidence/provenance, permission
 gates, comparability diagnostics, versioned capability profiles, deterministic eligibility, a
@@ -28,6 +37,12 @@ baselines, license audit, and Phase 1B documentation are available. No paid API 
 was used.
 
 ## Known limitations
+
+- Phase 6B evidence describes agent/model systems, not isolated base-model quality; exact revisions
+  and scaffolds are unknown for every pilot row.
+- All accepted live rows were source-declared (`verified=false`) and redistribution remains denied.
+- The bounded 20-row pilot is deliberately incomplete and cannot support universal ranking or
+  prompt-aware routing validation.
 
 - Phase 6A contains no admitted real provider or benchmark source; its adapter is fixture-only.
 - Provider aliases, availability, pricing, and capabilities are time-varying and require explicit
