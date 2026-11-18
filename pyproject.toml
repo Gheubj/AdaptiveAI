@@ -44,6 +44,7 @@ exclude = [
   "/data/catalog/**",
   "/vendor/**",
   "/reports/**",
+  "/planning/**",
   "/dist/**",
   "/.venv/**",
   "/.coverage",

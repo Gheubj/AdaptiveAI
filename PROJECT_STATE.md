@@ -1,8 +1,16 @@
 # Project State
 
-Updated: 2026-11-18
+Updated: 2026-11-18 (Phase 6A working branch)
 
 ## Current status
+
+Phase 6A is implemented on the unpublished `codex/phase6a` branch as an additive model-intelligence
+foundation. It adds exact identity and revision semantics, typed evidence/provenance, permission
+gates, comparability diagnostics, versioned capability profiles, deterministic eligibility, a
+fixture-backed benchmark adapter, and a v0.1.0 compatibility adapter. It used no real external
+source, paid API, model download, training, or benchmark run. Phase 6B remains proposal-only and no
+release action is authorized. Final verification passed with 82 tests, two optional integration
+skips, clean Ruff/format checks, 60% whole-package coverage, and clean wheel/sdist inspection.
 
 Phase 2 is complete for reproducible routing baselines on the frozen Phase 1B data. The official
 LLMRouterBench archive is stored outside Git with SHA-256
@@ -20,6 +28,11 @@ baselines, license audit, and Phase 1B documentation are available. No paid API 
 was used.
 
 ## Known limitations
+
+- Phase 6A contains no admitted real provider or benchmark source; its adapter is fixture-only.
+- Provider aliases, availability, pricing, and capabilities are time-varying and require explicit
+  source-specific freshness policy in a later phase.
+- The eligibility layer is a deterministic safety gate, not a quality rank or inference guarantee.
 
 - 10,881 repeated query/model pairs arise from overlapping upstream releases; 237 scores conflict.
 - 4,327 scores are missing non-randomly, primarily one SimpleQA/model panel.

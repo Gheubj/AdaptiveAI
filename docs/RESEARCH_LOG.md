@@ -108,3 +108,16 @@
   artifacts contain no raw/models/processed/vendor/reports directories.
 - Audited secrets, large files, dependencies, licenses, and publication controls. Nothing was
   published and no Phase 6 work began.
+
+## 2026-11-18 — Phase 6A model intelligence foundation
+
+- Implemented strict provider-independent identities for families, exact/unknown revisions,
+  quantization, providers, time-bounded aliases, deployments, and evaluation configurations.
+- Added content-addressed evidence with explicit missingness, provenance, reliability, permission
+  metadata, duplicate rejection, and structured comparability diagnostics.
+- Added deny-by-default redistribution decisions, versioned tri-state capability profiles, and
+  deterministic eligible/ineligible/unknown deployment checks with stable reason codes.
+- Added a synthetic fixture-only benchmark adapter and a compatibility wrapper that delegates to
+  the unchanged v0.1.0 routing engine.
+- Performed no real-source ingestion, model inference, training, network pilot, paid API call, or
+  model download. Phase 6B is documented only as a gated proposal.
