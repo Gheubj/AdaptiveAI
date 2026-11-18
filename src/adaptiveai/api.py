@@ -8,11 +8,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
+from adaptiveai.cloud import ProviderError
+from adaptiveai.cloud_gateway import CloudGateway
 from adaptiveai.config import ProductConfig
 from adaptiveai.lifecycle import ModelManager
 from adaptiveai.local_backend import BackendError
 from adaptiveai.product_registry import ModelRegistry
-from adaptiveai.public import ChatMessage, InferenceRequest, RoutingMode
+from adaptiveai.public import ChatMessage, InferenceRequest, ProviderScope, RoutingMode
 
 
 class MessagePayload(BaseModel):
@@ -33,6 +35,13 @@ class ChatPayload(BaseModel):
     local_only: bool = True
     max_latency_seconds: float | None = Field(None, gt=0)
     available_memory_bytes: int | None = Field(None, gt=0)
+    provider_scope: ProviderScope = ProviderScope.LOCAL
+    provider: str | None = None
+    provider_allowlist: tuple[str, ...] = ()
+    max_estimated_cost: float | None = Field(None, ge=0)
+    max_total_cost: float | None = Field(None, ge=0)
+    strict_budget: bool = True
+    fallback_models: tuple[str, ...] = ()
 
     @field_validator("model")
     @classmethod
@@ -46,11 +55,18 @@ class ProductService:
         manager: ModelManager,
         registry: ModelRegistry,
         config: ProductConfig,
+        cloud_gateway: CloudGateway | None = None,
     ):
         self.manager, self.registry, self.config = manager, registry, config
+        self.cloud_gateway = cloud_gateway
 
     def health(self) -> dict[str, object]:
-        return {"status": "ok", "lifecycle": self.manager.status(), "experimental": True}
+        return {
+            "status": "ok",
+            "lifecycle": self.manager.status(),
+            "cloud": self.cloud_gateway.diagnostics() if self.cloud_gateway else [],
+            "experimental": True,
+        }
 
     def models(self) -> dict[str, object]:
         data = []
@@ -65,7 +81,33 @@ class ProductService:
                     "quantization": status.model.quantization,
                 }
             )
+        if self.cloud_gateway:
+            for provider in self.cloud_gateway.diagnostics():
+                for model in provider["configured_models"]:
+                    data.append(
+                        {
+                            "id": model,
+                            "object": "model",
+                            "owned_by": provider["provider"],
+                            "available": provider["available"],
+                            "status": "configured",
+                            "quality": "unknown",
+                        }
+                    )
         return {"object": "list", "data": data}
+
+    def providers(self) -> dict[str, object]:
+        data = self.cloud_gateway.diagnostics() if self.cloud_gateway else []
+        return {"object": "list", "data": data}
+
+    @staticmethod
+    def _use_cloud(request: InferenceRequest) -> bool:
+        if request.local_only or request.provider_scope == ProviderScope.LOCAL:
+            return False
+        if request.provider_scope == ProviderScope.CLOUD:
+            return True
+        # Hybrid is explicit: naming a cloud provider selects cloud; otherwise local remains local.
+        return request.provider is not None
 
     def request(self, payload: ChatPayload) -> InferenceRequest:
         return InferenceRequest(
@@ -81,10 +123,23 @@ class ProductService:
             available_memory_bytes=(
                 payload.available_memory_bytes or self.config.available_memory_bytes
             ),
+            provider_scope=payload.provider_scope,
+            provider=payload.provider,
+            provider_allowlist=payload.provider_allowlist,
+            max_estimated_cost=payload.max_estimated_cost,
+            max_total_cost=payload.max_total_cost,
+            strict_budget=payload.strict_budget,
+            fallback_models=payload.fallback_models,
         )
 
     def complete(self, payload: ChatPayload) -> dict[str, object]:
-        result = self.manager.complete(self.request(payload))
+        request = self.request(payload)
+        if self._use_cloud(request):
+            if self.cloud_gateway is None:
+                raise ValueError("no cloud provider gateway is configured")
+            result = self.cloud_gateway.complete(request)
+        else:
+            result = self.manager.complete(request)
         return {
             "id": result.request_id,
             "object": "chat.completion",
@@ -131,6 +186,8 @@ def make_handler(service: ProductService, config: ProductConfig):
                 self._json(200, service.health())
             elif self.path == "/v1/models":
                 self._json(200, service.models())
+            elif self.path == "/v1/providers":
+                self._json(200, service.providers())
             else:
                 self._error(404, "not_found", "endpoint not found")
 
@@ -163,6 +220,11 @@ def make_handler(service: ProductService, config: ProductConfig):
             except BackendError as error:
                 status = 504 if "timed out" in str(error) else 503
                 self._error(status, "backend_error", str(error))
+            except ProviderError as error:
+                status = (
+                    429 if error.kind == "rate_limit" else 504 if error.kind == "timeout" else 502
+                )
+                self._error(status, error.kind, str(error))
             except (BrokenPipeError, ConnectionResetError):
                 return
             except Exception:
@@ -176,7 +238,13 @@ def make_handler(service: ProductService, config: ProductConfig):
             self.send_header("Cache-Control", "no-cache")
             self.send_header("Connection", "close")
             self.end_headers()
-            events = service.manager.stream(service.request(payload))
+            request = service.request(payload)
+            if service._use_cloud(request):
+                if service.cloud_gateway is None:
+                    raise ValueError("no cloud provider gateway is configured")
+                events = service.cloud_gateway.stream(request)
+            else:
+                events = service.manager.stream(request)
             try:
                 for event in events:
                     if event["type"] == "content":
@@ -225,3 +293,5 @@ def serve(service: ProductService, config: ProductConfig) -> None:
     finally:
         server.server_close()
         service.manager.shutdown()
+        if service.cloud_gateway:
+            service.cloud_gateway.close()

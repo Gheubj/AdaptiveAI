@@ -8,6 +8,8 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from adaptiveai.cloud import CloudProviderConfig
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -53,6 +55,7 @@ class ProductConfig(BaseModel):
     available_memory_bytes: int | None = Field(None, gt=0)
     log_level: str = "INFO"
     research_logging: bool = False
+    cloud_providers: tuple[CloudProviderConfig, ...] = ()
 
     @field_validator("default_routing_mode")
     @classmethod

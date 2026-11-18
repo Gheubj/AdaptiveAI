@@ -1,6 +1,6 @@
 # AdaptiveAI
 
-**AdaptiveAI 0.1.0 is an experimental research-oriented local LLM routing framework.**
+**AdaptiveAI 0.1.0 is an experimental research-oriented local and BYOK LLM gateway.**
 
 AdaptiveAI is an **experimental, local-first LLM routing framework**. It provides one observable
 interface for llama.cpp models and selects eligible models by measured latency, validation-defined
@@ -16,6 +16,8 @@ AdaptiveAI is not a proven universal inference optimizer and is not production h
 - one-model lifecycle manager with stickiness, switching hysteresis, cleanup, and health state
 - CPU-first llama.cpp backend, hardware inspection, CLI, Python client, and routing diagnostics
 - preserved reproducible research infrastructure from Phases 1–4.5
+- provider-independent BYOK cloud access with explicit provider/model selection, streaming,
+  typed errors, pricing metadata, and pre-request budgets (Phase 6G development branch)
 
 ## Installation
 
@@ -40,6 +42,21 @@ adaptiveai models list
 adaptiveai chat "Reply with exactly: ready" --mode fastest
 adaptiveai serve
 ```
+
+Cloud access is opt-in. Copy the provider example from
+[`docs/PROVIDER_CONFIGURATION.md`](docs/PROVIDER_CONFIGURATION.md), export your own key, set
+`local_only = false`, and use an explicit provider, model, budget, and acknowledgement:
+
+```bash
+export MY_PROVIDER_API_KEY='...'
+adaptiveai --config adaptiveai.toml providers list
+adaptiveai --config adaptiveai.toml chat "Reply with ready" --scope cloud \
+  --provider my-provider --model permitted-model --max-estimated-cost 0.01 --allow-paid-cloud
+```
+
+Provider inspection, startup, `doctor`, and model discovery do not generate completions. Pricing is
+deployment-specific; unknown pricing is never treated as zero. No cloud call is made while
+`local_only` is true.
 
 ```bash
 curl http://127.0.0.1:8088/v1/chat/completions \

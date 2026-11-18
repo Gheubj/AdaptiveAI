@@ -19,6 +19,14 @@ class AdaptiveAIClient:
         model: str = "auto",
         routing_mode: str = "balanced",
         max_tokens: int = 64,
+        provider_scope: str = "local",
+        provider: str | None = None,
+        local_only: bool = True,
+        max_estimated_cost: float | None = None,
+        max_total_cost: float | None = None,
+        strict_budget: bool = True,
+        provider_allowlist: tuple[str, ...] = (),
+        fallback_models: tuple[str, ...] = (),
     ) -> dict[str, object]:
         response = httpx.post(
             f"{self.base_url}/v1/chat/completions",
@@ -27,6 +35,14 @@ class AdaptiveAIClient:
                 "messages": [{"role": "user", "content": content}],
                 "routing_mode": routing_mode,
                 "max_tokens": max_tokens,
+                "provider_scope": provider_scope,
+                "provider": provider,
+                "local_only": local_only,
+                "max_estimated_cost": max_estimated_cost,
+                "max_total_cost": max_total_cost,
+                "strict_budget": strict_budget,
+                "provider_allowlist": provider_allowlist,
+                "fallback_models": fallback_models,
             },
             timeout=self.timeout,
         )
@@ -34,7 +50,18 @@ class AdaptiveAIClient:
         return response.json()
 
     def stream(
-        self, content: str, *, model: str = "auto", routing_mode: str = "balanced"
+        self,
+        content: str,
+        *,
+        model: str = "auto",
+        routing_mode: str = "balanced",
+        provider_scope: str = "local",
+        provider: str | None = None,
+        local_only: bool = True,
+        max_estimated_cost: float | None = None,
+        max_total_cost: float | None = None,
+        strict_budget: bool = True,
+        provider_allowlist: tuple[str, ...] = (),
     ) -> Iterator[dict[str, object]]:
         with httpx.stream(
             "POST",
@@ -44,6 +71,13 @@ class AdaptiveAIClient:
                 "messages": [{"role": "user", "content": content}],
                 "routing_mode": routing_mode,
                 "stream": True,
+                "provider_scope": provider_scope,
+                "provider": provider,
+                "local_only": local_only,
+                "max_estimated_cost": max_estimated_cost,
+                "max_total_cost": max_total_cost,
+                "strict_budget": strict_budget,
+                "provider_allowlist": provider_allowlist,
             },
             timeout=self.timeout,
         ) as response:

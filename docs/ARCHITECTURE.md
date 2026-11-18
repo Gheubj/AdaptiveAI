@@ -24,3 +24,11 @@ Product modules (`public`, `config`, `product_registry`, `routing_engine`, `life
 `client`, `local_backend`) use core dependencies. Research ingestion, pandas/torch models, and
 benchmark runners are optional and lazy CLI imports. Serving never loads benchmark tables. Cloud
 support remains a disabled interface/mock.
+# Phase 6G cloud boundary
+
+The local llama.cpp lifecycle remains an independent execution path. `CloudGateway` is an optional
+boundary selected only by an explicit non-local `ProviderScope`; `local_only` has precedence and
+prevents any cloud invocation. The gateway resolves one allowlisted provider and model, performs a
+worst-case price check, and invokes the provider adapter without automatic paid retries. The first
+adapter implements a bounded OpenAI chat-completions subset. Secrets remain environment references.
+See `CLOUD_PROVIDER_ARCHITECTURE.md`.

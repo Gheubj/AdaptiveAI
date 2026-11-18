@@ -145,3 +145,12 @@
   pairwise analysis, historical-cost refusal, and baseline eligibility.
 - Used only synthetic fixtures for calculations. No neural router, external dataset, paid API,
   inference, model weights, or cloud integration was used. Phase 6C was preregistered only.
+# 2026-11-19 — Phase 6G
+
+- Preserved Phase 6B.5 as local commit `5d7e650` and created `codex/phase6g`.
+- Added an offline-tested BYOK cloud gateway and OpenAI-compatible chat subset.
+- Added strict unknown-price rejection, usage/cost provenance, provider scopes, explicit selection,
+  endpoint/secret controls, and no automatic paid retries.
+- Used only deterministic mock responses. Real API spend, external inference, dataset acquisition,
+  model downloads, trained routing, and claims about quality or savings: none.
+- Prepared research-data permission drafts but did not send them.

@@ -173,3 +173,11 @@ Release-gate verification: 75 tests passed, one optional archive integration ski
 whole-package statement coverage, real local CLI/API streaming smoke passed, isolated wheel
 `pip check` passed, and release archives contain no raw datasets, weights, processed caches, vendor
 tree, or reports. The earlier 75% figure was phase-scoped.
+# Phase 6G development status (2026-11-19)
+
+Phase 6G implements an opt-in, provider-independent BYOK gateway on branch `codex/phase6g`.
+The OpenAI-compatible adapter, endpoint validation, provider scopes, streaming, typed errors,
+usage/cost records, strict budgets, CLI/SDK surfaces, and offline mock integration are implemented.
+No real cloud inference, paid request, model download, or research dataset download was performed.
+Quality for newly configured cloud models remains unknown; no routing superiority or saving is
+claimed. Phase 6B.5 remains frozen in local commit `5d7e650`.

@@ -29,6 +29,18 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument("--model")
     command.add_argument("--max-tokens", type=int, default=64)
     command.add_argument("--stream", action="store_true")
+    command.add_argument("--scope", choices=["local", "cloud", "hybrid"], default="local")
+    command.add_argument("--provider")
+    command.add_argument("--max-estimated-cost", type=float)
+    command.add_argument("--allow-paid-cloud", action="store_true")
+    providers = sub.add_parser("providers")
+    providers_sub = providers.add_subparsers(dest="providers_command", required=True)
+    providers_sub.add_parser("list")
+    estimate = providers_sub.add_parser("estimate")
+    estimate.add_argument("--provider", required=True)
+    estimate.add_argument("--model", required=True)
+    estimate.add_argument("--input-tokens", type=int, required=True)
+    estimate.add_argument("--max-output-tokens", type=int, required=True)
     command = sub.add_parser("import-archive")
     command.add_argument("archive", type=Path)
     command.add_argument("--raw-dir", type=Path)
@@ -112,7 +124,57 @@ def main(argv: list[str] | None = None) -> int:
     settings = Settings()
     product_config = load_product_config(args.config)
     configure_logging(product_config.log_level)
-    if args.command == "intelligence":
+    if args.command == "providers":
+        import os
+
+        if args.providers_command == "estimate":
+            if args.input_tokens < 0 or args.max_output_tokens < 0:
+                raise ValueError("token estimates must be non-negative")
+            matches = [
+                item for item in product_config.cloud_providers if item.provider_id == args.provider
+            ]
+            if len(matches) != 1:
+                raise ValueError("estimate requires one configured provider")
+            config = matches[0]
+            model = config.aliases.get(args.model, args.model)
+            prices = [item for item in config.pricing if item.model == model]
+            if not prices:
+                raise ValueError("pricing is unknown for this provider deployment and model")
+            price = prices[0]
+            amount = (
+                args.input_tokens * price.input_per_million
+                + args.max_output_tokens * price.output_per_million
+            ) / 1_000_000
+            print(
+                json.dumps(
+                    {
+                        "provider": config.provider_id,
+                        "deployment": config.deployment_id or config.base_url,
+                        "model": model,
+                        "currency": price.currency,
+                        "worst_case_estimate": amount,
+                        "pricing_source": price.source,
+                        "pricing_retrieved_at": price.retrieved_at,
+                        "guaranteed_bill": False,
+                    },
+                    indent=2,
+                )
+            )
+            return 0
+        payload = [
+            {
+                "provider": item.provider_id,
+                "deployment": item.deployment_id or item.base_url,
+                "base_url": item.base_url,
+                "credential_env": item.api_key_env,
+                "credential_available": bool(os.getenv(item.api_key_env)),
+                "configured_models": item.permitted_models,
+                "pricing_models": tuple(price.model for price in item.pricing),
+            }
+            for item in product_config.cloud_providers
+        ]
+        print(json.dumps(payload, indent=2))
+    elif args.command == "intelligence":
         from adaptiveai.evidence_comparison import compare_models
         from adaptiveai.evidence_store import EvidenceStore
         from adaptiveai.external_intelligence import write_private_snapshot
@@ -370,10 +432,53 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(payload, indent=2))
     elif args.command in {"serve", "chat"}:
         from adaptiveai.api import ProductService, serve
+        from adaptiveai.cloud import OpenAICompatibleProvider
+        from adaptiveai.cloud_gateway import CloudGateway
         from adaptiveai.lifecycle import ModelManager
         from adaptiveai.product_registry import ModelRegistry
-        from adaptiveai.public import ChatMessage, InferenceRequest, RoutingMode
+        from adaptiveai.public import ChatMessage, InferenceRequest, ProviderScope, RoutingMode
         from adaptiveai.routing_engine import RoutingEngine, load_model_profiles
+
+        gateway = (
+            CloudGateway(
+                tuple(OpenAICompatibleProvider(item) for item in product_config.cloud_providers)
+            )
+            if product_config.cloud_providers
+            else None
+        )
+        scope = ProviderScope(args.scope) if args.command == "chat" else ProviderScope.LOCAL
+        cloud_chat = scope == ProviderScope.CLOUD or (
+            scope == ProviderScope.HYBRID and args.provider is not None
+        )
+        if args.command == "chat" and cloud_chat:
+            if not args.allow_paid_cloud:
+                raise ValueError("cloud chat requires explicit --allow-paid-cloud acknowledgement")
+            if gateway is None:
+                raise ValueError("no cloud providers are configured")
+            request = InferenceRequest(
+                messages=(ChatMessage("user", args.prompt),),
+                model=args.model,
+                routing_mode=RoutingMode(args.mode or product_config.default_routing_mode),
+                max_tokens=args.max_tokens,
+                stream=args.stream,
+                local_only=False,
+                provider_scope=scope,
+                provider=args.provider,
+                max_estimated_cost=args.max_estimated_cost,
+            )
+            try:
+                if args.stream:
+                    for event in gateway.stream(request):
+                        if event["type"] == "content":
+                            print(event["content"], end="", flush=True)
+                    print()
+                else:
+                    response = gateway.complete(request)
+                    print(response.text)
+                    print(json.dumps(response.diagnostics.__dict__, indent=2))
+            finally:
+                gateway.close()
+            return 0
 
         registry = ModelRegistry(product_config.registry_path)
         profiles_path = product_config.registry_path.with_name("local_model_profiles.json")
@@ -399,7 +504,7 @@ def main(argv: list[str] | None = None) -> int:
             runtime_config = product_config.__class__.model_validate(
                 {**product_config.model_dump(), **updates}
             )
-            service = ProductService(manager, registry, runtime_config)
+            service = ProductService(manager, registry, runtime_config, gateway)
             print(
                 f"AdaptiveAI experimental server: http://{runtime_config.host}:{runtime_config.port}"
             )
@@ -413,6 +518,8 @@ def main(argv: list[str] | None = None) -> int:
                 max_tokens=args.max_tokens,
                 stream=args.stream,
                 local_only=product_config.local_only,
+                provider_scope=scope,
+                provider=args.provider,
                 max_latency_seconds=product_config.max_latency_seconds,
                 available_memory_bytes=product_config.available_memory_bytes,
             )
@@ -428,6 +535,8 @@ def main(argv: list[str] | None = None) -> int:
                     print(json.dumps(response.diagnostics.__dict__, indent=2))
             finally:
                 manager.shutdown()
+                if gateway:
+                    gateway.close()
     return 0
 
 
