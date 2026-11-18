@@ -1,0 +1,17 @@
+{
+  "source": "Phase 4 and Phase 4.5 validation-only measurements; host-specific and experimental",
+  "models": {
+    "qwen2.5-0.5b-instruct-q4km": {
+      "estimated_quality": 0.25,
+      "predicted_p95_latency_seconds": 0.651,
+      "memory_bytes": 531984384,
+      "loading_seconds": 0.528
+    },
+    "smollm2-1.7b-instruct-q4km": {
+      "estimated_quality": 0.45,
+      "predicted_p95_latency_seconds": 1.694,
+      "memory_bytes": 2287874048,
+      "loading_seconds": 1.704
+    }
+  }
+}

@@ -1,0 +1,373 @@
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+from adaptiveai.config import Settings, configure_logging, load_product_config
+from adaptiveai.hardware import discover_hardware
+
+
+def parser() -> argparse.ArgumentParser:
+    root = argparse.ArgumentParser(prog="adaptiveai")
+    root.add_argument("--config", type=Path, help="TOML runtime configuration")
+    sub = root.add_subparsers(dest="command", required=True)
+    sub.add_parser("doctor")
+    hardware = sub.add_parser("hardware")
+    hardware_sub = hardware.add_subparsers(dest="hardware_command", required=True)
+    hardware_sub.add_parser("inspect")
+    models = sub.add_parser("models")
+    models_sub = models.add_subparsers(dest="models_command", required=True)
+    models_list = models_sub.add_parser("list")
+    models_list.add_argument("--verify-hashes", action="store_true")
+    command = sub.add_parser("serve")
+    command.add_argument("--host")
+    command.add_argument("--port", type=int)
+    command = sub.add_parser("chat")
+    command.add_argument("prompt")
+    command.add_argument("--mode", choices=["fastest", "quality", "balanced", "hardware-aware"])
+    command.add_argument("--model")
+    command.add_argument("--max-tokens", type=int, default=64)
+    command.add_argument("--stream", action="store_true")
+    command = sub.add_parser("import-archive")
+    command.add_argument("archive", type=Path)
+    command.add_argument("--raw-dir", type=Path)
+    command.add_argument("--source-uri", default="local-file")
+    command = sub.add_parser("download-archive")
+    command.add_argument("--raw-dir", type=Path)
+    command.add_argument("--max-gib", type=float, default=3.0)
+    command = sub.add_parser("normalize")
+    command.add_argument("archive", type=Path)
+    command.add_argument("--output-dir", type=Path)
+    command.add_argument("--seed", type=int, default=3407)
+    command.add_argument("--holdout-task", action="append", default=[])
+    command = sub.add_parser("catalog")
+    command.add_argument("--output-dir", type=Path, default=Path("data/catalog"))
+    command = sub.add_parser("validate")
+    command.add_argument("directory", type=Path, nargs="?", default=Path("data/processed"))
+    command = sub.add_parser("eda")
+    command.add_argument("directory", type=Path, nargs="?", default=Path("data/processed"))
+    command.add_argument("report_dir", type=Path, nargs="?", default=Path("reports/eda"))
+    command = sub.add_parser("audit-archive")
+    command.add_argument("archive", type=Path)
+    command.add_argument("--output", type=Path, default=Path("reports/real_data/schema_audit.json"))
+    command = sub.add_parser("coverage")
+    command.add_argument("directory", type=Path, nargs="?", default=Path("data/processed"))
+    command.add_argument("output_dir", type=Path, nargs="?", default=Path("reports/real_data"))
+    command = sub.add_parser("benchmark")
+    command.add_argument("--processed-dir", type=Path, default=Path("data/processed"))
+    command.add_argument("--output-dir", type=Path, default=Path("reports/phase2/runs"))
+    command.add_argument(
+        "--pool", choices=["lightweight20", "proprietary8"], default="lightweight20"
+    )
+    command.add_argument("--split", choices=["validation", "test", "ood_test"], default="test")
+    command.add_argument(
+        "--resolution-policy", choices=["mean", "representative", "exclude"], default="mean"
+    )
+    command.add_argument("--seed", type=int, default=3407)
+    command.add_argument("--random-repeats", type=int, default=5)
+    command.add_argument("--bootstrap-samples", type=int, default=1000)
+    command = sub.add_parser("neural-suite")
+    command.add_argument("--processed-dir", type=Path, default=Path("data/processed"))
+    command.add_argument("--output-dir", type=Path, required=True)
+    command.add_argument(
+        "--pool", choices=["lightweight20", "proprietary8"], default="proprietary8"
+    )
+    command = sub.add_parser("neural-ablation")
+    command.add_argument("--processed-dir", type=Path, default=Path("data/processed"))
+    command.add_argument("--output-dir", type=Path, required=True)
+    sub.add_parser("hardware-inspect")
+    command = sub.add_parser("models-list")
+    command.add_argument("--registry", type=Path, default=Path("data/local_model_registry.json"))
+    command = sub.add_parser("local-infer")
+    command.add_argument("model_id")
+    command.add_argument("prompt")
+    command.add_argument("--registry", type=Path, default=Path("data/local_model_registry.json"))
+    command.add_argument("--max-tokens", type=int, default=64)
+    command.add_argument("--timeout", type=float, default=120)
+    return root
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parser().parse_args(argv)
+    settings = Settings()
+    product_config = load_product_config(args.config)
+    configure_logging(product_config.log_level)
+    if args.command == "import-archive":
+        from adaptiveai.io import import_archive
+
+        path, manifest = import_archive(
+            args.archive, args.raw_dir or settings.raw_dir, source_uri=args.source_uri
+        )
+        print(
+            json.dumps(
+                {"archive": str(path), "manifest": manifest.model_dump(mode="json")}, indent=2
+            )
+        )
+    elif args.command == "download-archive":
+        from adaptiveai.io import download_official_archive
+
+        path, manifest = download_official_archive(
+            args.raw_dir or settings.raw_dir,
+            max_bytes=int(args.max_gib * 1024**3),
+        )
+        print(
+            json.dumps(
+                {"archive": str(path), "manifest": manifest.model_dump(mode="json")},
+                indent=2,
+            )
+        )
+    elif args.command == "normalize":
+        import pandas as pd
+
+        from adaptiveai.normalize import normalize_archive, write_empty_future_tables
+        from adaptiveai.splits import create_splits
+
+        output = args.output_dir or settings.processed_dir
+        counts = normalize_archive(args.archive, output)
+        queries = pd.read_parquet(output / "queries.parquet")
+        create_splits(
+            queries, seed=args.seed, holdout_task_types=set(args.holdout_task)
+        ).to_parquet(output / "data_splits.parquet", index=False)
+        write_empty_future_tables(output)
+        print(json.dumps(counts, indent=2))
+    elif args.command == "catalog":
+        import os
+
+        from adaptiveai.registry import fetch_catalog
+
+        raw, table = fetch_catalog(args.output_dir, os.getenv("OPENROUTER_API_KEY"))
+        print(json.dumps({"raw": str(raw), "parquet": str(table)}, indent=2))
+    elif args.command == "validate":
+        from adaptiveai.validation import validate_dataset
+
+        errors = validate_dataset(args.directory)
+        print(json.dumps({"valid": not errors, "errors": errors}, indent=2))
+        return 1 if errors else 0
+    elif args.command == "eda":
+        from adaptiveai.eda import run_eda
+
+        print(json.dumps(run_eda(args.directory, args.report_dir), indent=2))
+    elif args.command == "audit-archive":
+        from adaptiveai.audit import audit_archive
+
+        print(json.dumps(audit_archive(args.archive, args.output), indent=2))
+    elif args.command == "coverage":
+        from adaptiveai.audit import coverage_analysis
+
+        print(json.dumps(coverage_analysis(args.directory, args.output_dir), indent=2))
+    elif args.command == "benchmark":
+        from adaptiveai.benchmark import BenchmarkConfig, run_benchmark
+
+        config = BenchmarkConfig(
+            pool=args.pool,
+            split=args.split,
+            resolution_policy=args.resolution_policy,
+            seed=args.seed,
+            random_repeats=args.random_repeats,
+            bootstrap_samples=args.bootstrap_samples,
+        )
+        print(
+            json.dumps(
+                {"output": str(run_benchmark(args.processed_dir, args.output_dir, config))},
+                indent=2,
+            )
+        )
+    elif args.command == "neural-suite":
+        from adaptiveai.neural_experiments import run_neural_suite
+
+        print(
+            json.dumps(
+                {
+                    "output": str(
+                        run_neural_suite(args.processed_dir, args.output_dir, pool=args.pool)
+                    )
+                },
+                indent=2,
+            )
+        )
+    elif args.command == "neural-ablation":
+        from adaptiveai.neural_experiments import run_ablation
+
+        print(
+            json.dumps({"output": str(run_ablation(args.processed_dir, args.output_dir))}, indent=2)
+        )
+    elif args.command == "hardware-inspect" or (
+        args.command == "hardware" and args.hardware_command == "inspect"
+    ):
+        print(json.dumps(discover_hardware().to_dict(), indent=2))
+    elif args.command == "models-list":
+        from adaptiveai.local_backend import load_registry
+
+        models = load_registry(args.registry)
+        payload = [{**model.__dict__, "path": str(model.path)} for model in models]
+        print(json.dumps(payload, indent=2))
+    elif args.command == "local-infer":
+        from adaptiveai.local_backend import InferenceParameters, LlamaCppServer, load_registry
+
+        models = load_registry(args.registry)
+        matches = [model for model in models if model.model_id == args.model_id]
+        if not matches:
+            raise ValueError(f"Unknown local model: {args.model_id}")
+        with LlamaCppServer(
+            Path("vendor/llama.cpp/build/bin/llama-server"), matches[0], port=18777
+        ) as server:
+            result = server.infer(
+                args.prompt,
+                InferenceParameters(max_tokens=args.max_tokens),
+                timeout=args.timeout,
+            )
+        payload = result.__dict__.copy()
+        payload.pop("raw_stderr")
+        print(json.dumps(payload, indent=2))
+    elif args.command == "doctor":
+        from adaptiveai.product_registry import ModelRegistry
+
+        checks = []
+        checks.append(
+            {
+                "check": "backend",
+                "ok": product_config.backend_path.is_file(),
+                "message": (
+                    str(product_config.backend_path)
+                    if product_config.backend_path.is_file()
+                    else (
+                        "missing; build llama.cpp or set backend_path: "
+                        f"{product_config.backend_path}"
+                    )
+                ),
+            }
+        )
+        try:
+            registry = ModelRegistry(product_config.registry_path)
+            statuses = registry.inspect()
+            checks.append(
+                {
+                    "check": "registry",
+                    "ok": True,
+                    "message": f"{len(statuses)} configured model(s)",
+                }
+            )
+            checks.extend(
+                {
+                    "check": f"model:{status.model.model_id}",
+                    "ok": status.available,
+                    "message": status.message,
+                }
+                for status in statuses
+            )
+        except (FileNotFoundError, ValueError) as error:
+            checks.append({"check": "registry", "ok": False, "message": str(error)})
+        hardware = discover_hardware()
+        checks.append(
+            {
+                "check": "available_ram",
+                "ok": hardware.available_ram_bytes > 512 * 1024**2,
+                "message": f"{hardware.available_ram_bytes / 1024**3:.2f} GiB available",
+            }
+        )
+        print(json.dumps({"ok": all(row["ok"] for row in checks), "checks": checks}, indent=2))
+        return 0 if all(row["ok"] for row in checks) else 1
+    elif args.command == "models" and args.models_command == "list":
+        from adaptiveai.product_registry import ModelRegistry
+
+        registry = ModelRegistry(product_config.registry_path)
+        payload = [
+            {
+                "id": status.model.model_id,
+                "family": status.model.family,
+                "quantization": status.model.quantization,
+                "available": status.available,
+                "hash_valid": status.hash_valid,
+                "message": status.message,
+            }
+            for status in registry.inspect(verify_hash=args.verify_hashes)
+        ]
+        print(json.dumps(payload, indent=2))
+    elif args.command in {"serve", "chat"}:
+        from adaptiveai.api import ProductService, serve
+        from adaptiveai.lifecycle import ModelManager
+        from adaptiveai.product_registry import ModelRegistry
+        from adaptiveai.public import ChatMessage, InferenceRequest, RoutingMode
+        from adaptiveai.routing_engine import RoutingEngine, load_model_profiles
+
+        registry = ModelRegistry(product_config.registry_path)
+        profiles_path = product_config.registry_path.with_name("local_model_profiles.json")
+        profiles = load_model_profiles(
+            profiles_path, tuple(model.model_id for model in registry.models())
+        )
+        router = RoutingEngine(
+            profiles, balanced_latency_weight=product_config.balanced_latency_weight
+        )
+        manager = ModelManager(
+            registry,
+            router,
+            product_config.backend_path,
+            keep_alive_seconds=product_config.keep_alive_seconds,
+            switch_hysteresis_seconds=product_config.switch_hysteresis_seconds,
+        )
+        if args.command == "serve":
+            updates = {}
+            if args.host:
+                updates["host"] = args.host
+            if args.port:
+                updates["port"] = args.port
+            runtime_config = product_config.__class__.model_validate(
+                {**product_config.model_dump(), **updates}
+            )
+            service = ProductService(manager, registry, runtime_config)
+            print(
+                f"AdaptiveAI experimental server: http://{runtime_config.host}:{runtime_config.port}"
+            )
+            serve(service, runtime_config)
+        else:
+            mode = RoutingMode(args.mode or product_config.default_routing_mode)
+            request = InferenceRequest(
+                messages=(ChatMessage("user", args.prompt),),
+                model=args.model,
+                routing_mode=mode,
+                max_tokens=args.max_tokens,
+                stream=args.stream,
+                local_only=product_config.local_only,
+                max_latency_seconds=product_config.max_latency_seconds,
+                available_memory_bytes=product_config.available_memory_bytes,
+            )
+            try:
+                if args.stream:
+                    for event in manager.stream(request):
+                        if event["type"] == "content":
+                            print(event["content"], end="", flush=True)
+                    print()
+                else:
+                    response = manager.complete(request)
+                    print(response.text)
+                    print(json.dumps(response.diagnostics.__dict__, indent=2))
+            finally:
+                manager.shutdown()
+    return 0
+
+
+def entrypoint() -> int:
+    try:
+        return main()
+    except ModuleNotFoundError as error:
+        research_modules = {
+            "matplotlib",
+            "numpy",
+            "pandas",
+            "pyarrow",
+            "scipy",
+            "sklearn",
+            "sentence_transformers",
+            "torch",
+        }
+        if error.name in research_modules:
+            raise SystemExit(
+                f"Optional research dependency '{error.name}' is missing. "
+                "Install AdaptiveAI with: pip install -e '.[research]'"
+            ) from error
+        raise
+
+
+if __name__ == "__main__":
+    raise SystemExit(entrypoint())

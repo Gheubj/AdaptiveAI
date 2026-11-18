@@ -1,0 +1,29 @@
+{
+  "backend": {
+    "name": "llama.cpp",
+    "commit": "a300a9c33462f23d9d61e951650d249486f2b0f6",
+    "build": "CPU native, OpenMP, GNU 13.3.0"
+  },
+  "models": [
+    {
+      "model_id": "qwen2.5-0.5b-instruct-q4km",
+      "path": "data/models/local/qwen/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf",
+      "family": "Qwen2.5",
+      "parameters": 500000000,
+      "quantization": "Q4_K_M",
+      "license": "Apache-2.0",
+      "context_length": 32768,
+      "file_sha256": "6eb923e7d26e9cea28811e1a8e852009b21242fb157b26149d3b188f3a8c8653"
+    },
+    {
+      "model_id": "smollm2-1.7b-instruct-q4km",
+      "path": "data/models/local/smollm/SmolLM2-1.7B-Instruct-Q4_K_M.gguf",
+      "family": "SmolLM2",
+      "parameters": 1700000000,
+      "quantization": "Q4_K_M",
+      "license": "Apache-2.0",
+      "context_length": 8192,
+      "file_sha256": "77665ea4815999596525c636fbeb56ba8b080b46ae85efef4f0d986a139834d7"
+    }
+  ]
+}

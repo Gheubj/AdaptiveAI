@@ -1,0 +1,15 @@
+[adaptiveai]
+registry_path = "data/local_model_registry.json"
+backend_path = "vendor/llama.cpp/build/bin/llama-server"
+default_routing_mode = "balanced"
+local_only = true
+host = "127.0.0.1"
+port = 8088
+request_timeout_seconds = 120
+max_request_bytes = 1048576
+max_concurrency = 1
+keep_alive_seconds = 300
+switch_hysteresis_seconds = 0.5
+balanced_latency_weight = 0.15
+log_level = "INFO"
+research_logging = false
