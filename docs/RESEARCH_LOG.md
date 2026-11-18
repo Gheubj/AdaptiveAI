@@ -133,3 +133,15 @@
   export denies every record because result redistribution is not explicitly licensed.
 - Added mocked/offline tests, opt-in live integration, conservative comparison/profile queries, and
   CLI/example workflows. Phase 6C was not started.
+
+## 2026-11-19 — Phase 6B.5 routing data fitness
+
+- Preserved Phase 6B as local commit `6af2021` before new work.
+- Audited xRouteBench and RoutingCompendium without downloading row-level data. xRouteBench has the
+  stronger supervision schema but no declared dataset license; RoutingCompendium inherits multiple
+  unresolved source licenses.
+- Added distinct routing-supervision records, bounded adapter contracts, explicit missing matrix
+  cells, duplicate/conflict checks, deterministic sampling, leakage checks, binary Oracle and
+  pairwise analysis, historical-cost refusal, and baseline eligibility.
+- Used only synthetic fixtures for calculations. No neural router, external dataset, paid API,
+  inference, model weights, or cloud integration was used. Phase 6C was preregistered only.

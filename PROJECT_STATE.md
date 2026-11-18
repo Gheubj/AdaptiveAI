@@ -4,6 +4,17 @@ Updated: 2026-11-18 (Phase 6A working branch)
 
 ## Current status
 
+Phase 6B.5 is implemented locally on top of Phase 6B commit `6af2021`. Audits found xRouteBench
+technically fit for matched prompt/model routing supervision and RoutingCompendium useful for
+cross-pool study, but neither currently has a sufficiently explicit row-level permission basis for
+ingestion: xRouteBench declares no dataset license, while RoutingCompendium delegates rights to five
+source benchmarks without a consolidated matrix. No external rows were downloaded. Source-neutral
+schemas, fixture adapter, matrix/leakage/complementarity/cost analysis, and Phase 6C preregistration
+were implemented offline. Decision: **BLOCKED BY DATA RIGHTS / DATA QUALITY** pending clarification.
+Final verification passed with 98 tests, three expected skips, 68% whole-package coverage, 91–100%
+new-module coverage, clean Ruff/format, successful builds and clean-target imports. Focused tests
+used 48,548 KiB peak RSS; no external dataset bytes were ingested.
+
 Phase 6B is implemented locally on top of Phase 6A commit `6bedc34`. One bounded anonymous import
 used the official Hugging Face leaderboard API for SWE-bench Verified: 59,880 bytes, 78 source rows,
 20 accepted under the configured limit, zero malformed rows, 20 unresolved identities, 20 unknown
@@ -37,6 +48,12 @@ baselines, license audit, and Phase 1B documentation are available. No paid API 
 was used.
 
 ## Known limitations
+
+- Phase 6B.5 contains no new external matched outcomes; public dataset-card counts are audit metadata,
+  not locally validated empirical results.
+- Exact/near-duplicate leakage beyond normalized text hashes requires a permission-cleared snapshot.
+- Historical routing identities cannot be promoted to live deployments without revision mapping and
+  targeted current calibration.
 
 - Phase 6B evidence describes agent/model systems, not isolated base-model quality; exact revisions
   and scaffolds are unknown for every pilot row.

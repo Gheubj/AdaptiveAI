@@ -8,6 +8,14 @@ profiles`. Permission evaluation gates local analysis and publication separately
 required for ordinary routing, SDK/API operation, or the default test suite. Aggregate agent-system
 evidence remains separate from base-model and provider-deployment evidence.
 
+## Routing supervision (Phase 6B.5)
+
+Routing supervision is a separate data plane from aggregate capability evidence. Immutable queries,
+historical candidates, and matched outcomes form an explicit sparse matrix with native metric and
+split semantics. Adapters are bounded and permission-bearing. Analysis refuses mixed metrics,
+conflicts, missing historical prices, and unreviewed historical-to-live identity transfer. Router
+training remains a later, separately gated phase.
+
 The API validates bounded input into `InferenceRequest`. `RoutingEngine` filters profiles and emits
 diagnostics. `ModelManager` applies documented hysteresis, loads one model, and calls llama.cpp.
 Responses distinguish predictions, observations, constraints, selection reason, and fallback.
