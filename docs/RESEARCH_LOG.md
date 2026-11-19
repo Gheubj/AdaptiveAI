@@ -181,3 +181,13 @@
   quota and privacy checks could not run.
 - Failed closed before inference: authenticated requests 0, inference requests 0, prompt transfers
   0, retries 0 and spend USD 0.00.
+
+# 2026-11-19 — Phase 7.1 GroqCloud preparation
+
+- Preserved the OpenRouter historical live-smoke report unchanged and added a separate Groq profile.
+- Recorded Groq's published standard price instead of treating Free-tier eligibility as zero price.
+- Added support and a regression test for official provider base URLs already ending in `/v1`.
+- Public-DNS/HTTPS/allowlist endpoint preflight passed without an HTTP request; `GROQ_API_KEY` was
+  absent, so account/model/privacy checks could not run.
+- Strict zero-budget authorization cannot represent the unverified Free entitlement without
+  falsifying pricing; inference, retries, prompt transfers and spend remained zero.

@@ -369,6 +369,13 @@ class OpenAICompatibleProvider:
     def close(self) -> None:
         self._client.close()
 
+    def _endpoint(self, resource: str) -> str:
+        """Resolve a resource for both provider roots and documented `/v1` API roots."""
+        base = self.config.base_url.rstrip("/")
+        path = urlparse(base).path.rstrip("/")
+        prefix = base if path.endswith("/v1") else f"{base}/v1"
+        return f"{prefix}/{resource.lstrip('/')}"
+
     def _key(self) -> str:
         key = os.getenv(self.config.api_key_env)
         if not key:
@@ -395,7 +402,7 @@ class OpenAICompatibleProvider:
     def discover_models(self) -> tuple[str, ...]:
         self._check_rate_limit()
         try:
-            response = self._client.get("/v1/models", headers=self._headers())
+            response = self._client.get(self._endpoint("models"), headers=self._headers())
             self._raise_status(response)
             self._bounded(response)
             data = response.json().get("data", [])
@@ -458,7 +465,7 @@ class OpenAICompatibleProvider:
         self._check_rate_limit()
         try:
             response = self._client.post(
-                "/v1/chat/completions",
+                self._endpoint("chat/completions"),
                 headers=self._headers(),
                 json=self._payload(
                     messages,
@@ -507,7 +514,7 @@ class OpenAICompatibleProvider:
         try:
             with self._client.stream(
                 "POST",
-                "/v1/chat/completions",
+                self._endpoint("chat/completions"),
                 headers=self._headers(),
                 json=self._payload(
                     messages,

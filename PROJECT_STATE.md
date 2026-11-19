@@ -202,3 +202,12 @@ The owner subsequently authorized one exact OpenRouter smoke request, but the ma
 failed closed because `OPENROUTER_API_KEY` was not present in the task process environment. No
 authenticated request or inference was sent, the prompt was not disclosed, and cost remained USD
 0.00. External validation therefore remains incomplete.
+
+# Phase 7.1 Groq preparation status (2026-11-19)
+
+OpenRouter historical evidence remains unchanged. A separate GroqCloud profile targets the official
+`/openai/v1` API and exact `openai/gpt-oss-20b` model. No key was present and no authenticated or
+inference request was made. Standard published pricing is truthfully recorded as USD 0.075/M input
+and USD 0.30/M output; the current strict price-based gateway cannot independently represent a
+Free-tier entitlement under an authorized USD 0 budget. Status: `BLOCKED_BY_BUDGET` (with account
+preflight also blocked until `GROQ_API_KEY` is inherited by the process).

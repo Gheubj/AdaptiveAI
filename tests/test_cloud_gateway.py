@@ -154,6 +154,24 @@ def test_provider_discovery_completion_stream_and_usage(monkeypatch):
     provider.close()
 
 
+def test_documented_versioned_base_url_is_not_duplicated(monkeypatch):
+    monkeypatch.setenv("ADAPTIVEAI_TEST_KEY", "secret")
+    paths = []
+
+    def handler(request):
+        paths.append(request.url.path)
+        return httpx.Response(200, json={"data": [{"id": "mock-model"}]})
+
+    provider = OpenAICompatibleProvider(
+        provider_config(base_url="https://api.example.test/openai/v1"),
+        transport=httpx.MockTransport(handler),
+        resolver=public_resolver,
+    )
+    assert provider.discover_models() == ("mock-model",)
+    assert paths == ["/openai/v1/models"]
+    provider.close()
+
+
 def test_typed_errors_are_redacted(monkeypatch):
     provider, _ = make_provider(monkeypatch)
     with pytest.raises(AuthenticationError) as auth:
