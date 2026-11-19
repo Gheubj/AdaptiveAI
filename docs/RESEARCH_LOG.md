@@ -162,3 +162,12 @@
 - Synthetic task/evidence fixtures test correctness only; no empirical gain is reported.
 - Added budget reservation/release and strict-SSRF fail-closed configuration.
 - External inference, spending, downloads, training and restricted data use: none.
+
+# 2026-11-19 — Phase 7.1 external-provider readiness
+
+- Preserved Phase 7 in local commit `a13e808` and created `codex/phase7-1`.
+- Audited current official OpenRouter catalog, model page, routing, rate-limit and pricing material.
+- Selected exact `inclusionai/ling-3.2-flash:free`; excluded dynamic router IDs.
+- Added a dry-run smoke plan requiring one upstream, disabled fallback and a zero-USD dated price.
+- External inference authorization remained `NOT_AUTHORIZED`; requests and spend were zero.
+- Proposed v0.2.0a1 only; no version change, push, tag, release, PyPI upload or Phase 8 work.

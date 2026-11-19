@@ -63,6 +63,18 @@ deployment-specific; unknown pricing is never treated as zero. No cloud call is 
 The fully offline Developer Alpha walkthrough is in
 [`docs/DEVELOPER_ALPHA_QUICKSTART.md`](docs/DEVELOPER_ALPHA_QUICKSTART.md).
 
+Phase 7.1 adds a no-network external-provider preflight. The pinned OpenRouter example does not
+grant permission to infer:
+
+```bash
+adaptiveai --config examples/openrouter_phase7_1.toml providers smoke-plan \
+  --provider openrouter --model inclusionai/ling-3.2-flash:free
+```
+
+It must report `authorization: NOT_AUTHORIZED`. See the
+[Developer Preview quick start](docs/DEVELOPER_PREVIEW_QUICKSTART.md) and
+[authorization record](docs/EXTERNAL_SMOKE_AUTHORIZATION.md). No external smoke was executed.
+
 ```bash
 curl http://127.0.0.1:8088/v1/chat/completions \
   -H 'Content-Type: application/json' \
@@ -109,6 +121,7 @@ Results below use different panels and must not be merged:
 - Phase 4.5 local V2: Qwen2.5-0.5B 0.172 and SmolLM2-1.7B 0.416 on 250 held-out tasks. Oracle is
   0.424, leaving only 0.008 headroom above SmolLM2. Oracle is not deployable.
 - Hardware-aware routing has **not** demonstrated superiority over fixed strongest-model routing.
+- OpenRouter compatibility is configuration-audited but live inference remains unvalidated.
 
 See [research results](docs/RESEARCH_RESULTS.md) and [limitations](docs/LIMITATIONS.md).
 

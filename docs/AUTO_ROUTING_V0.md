@@ -20,3 +20,16 @@ default or returns `INSUFFICIENT_EVIDENCE`; it never silently selects an unknown
 Explanations include provider/deployment/model, category, eligible/excluded candidates and reasons,
 evidence IDs, missing information, cost status, selection reason and router-only overhead. They
 exclude prompt/response text and credentials.
+
+## Usage
+
+```bash
+adaptiveai --config examples/phase7_alpha.toml route explain \
+  "Debug this Python exception" --mode auto --scope hybrid
+adaptiveai --config examples/phase7_alpha.toml route explain \
+  "Summarize this paragraph" --mode economy --scope hybrid
+```
+
+These commands are dry-run explanations and do not infer. The included evidence is synthetic and
+tests behavior only. A selected cloud candidate still requires an available credential, explicit
+execution acknowledgement, applicable owner authorization, and all gateway budget controls.

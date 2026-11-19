@@ -133,6 +133,69 @@ class CloudProviderConfig(BaseModel):
         return self
 
 
+def external_smoke_plan(
+    config: CloudProviderConfig,
+    model: str,
+    *,
+    input_tokens: int,
+    max_output_tokens: int,
+) -> dict[str, Any]:
+    """Build a non-network external-smoke preflight report.
+
+    This function deliberately has no provider object and therefore cannot authenticate or send
+    content.  It is a release/readiness guard, not authorization to execute the request.
+    """
+    resolved = config.aliases.get(model, model)
+    exact_model = resolved not in {"openrouter/free", "openrouter/auto"}
+    price = next((item for item in config.pricing if item.model == resolved), None)
+    provider_options = config.request_parameters.get("provider")
+    options = provider_options if isinstance(provider_options, dict) else {}
+    only = options.get("only")
+    pinned_upstream = isinstance(only, list) and len(only) == 1 and bool(only[0])
+    fallback_disabled = options.get("allow_fallbacks") is False
+    data_collection_denied = options.get("data_collection") == "deny"
+    zero_pricing = bool(
+        price
+        and price.currency == "USD"
+        and price.input_per_million == 0
+        and price.output_per_million == 0
+    )
+    configured = resolved in config.permitted_models
+    checks = {
+        "exact_non_router_model": exact_model,
+        "model_allowlisted": configured,
+        "single_upstream_pinned": pinned_upstream,
+        "provider_fallback_disabled": fallback_disabled,
+        "data_collection_denied": data_collection_denied,
+        "zero_usd_pricing_snapshot": zero_pricing,
+        "non_streaming": True,
+    }
+    estimate = None
+    if price and input_tokens >= 0 and max_output_tokens >= 0:
+        estimate = (
+            input_tokens * price.input_per_million + max_output_tokens * price.output_per_million
+        ) / 1_000_000
+    return {
+        "status": "READY_FOR_OWNER_AUTHORIZATION" if all(checks.values()) else "BLOCKED",
+        "executes_inference": False,
+        "authorization": "NOT_AUTHORIZED",
+        "provider": config.provider_id,
+        "deployment": config.deployment_id or config.base_url,
+        "model": resolved,
+        "upstream_provider": only[0] if pinned_upstream else None,
+        "stream": False,
+        "request_count": 1,
+        "prompt_category": "synthetic compatibility phrase; no private or research data",
+        "input_tokens_estimate": input_tokens,
+        "max_output_tokens": max_output_tokens,
+        "worst_case_estimated_usd": estimate,
+        "pricing_source": price.source if price else None,
+        "pricing_retrieved_at": price.retrieved_at if price else None,
+        "pricing_is_guaranteed_bill": False,
+        "checks": checks,
+    }
+
+
 def validate_endpoint(
     config: CloudProviderConfig,
     resolver: Callable[..., list[tuple[Any, ...]]] = socket.getaddrinfo,

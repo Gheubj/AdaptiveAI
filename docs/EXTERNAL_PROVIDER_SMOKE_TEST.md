@@ -1,11 +1,14 @@
 # External Provider Smoke-Test Procedure
 
-Not executed. Inspect and estimate first:
+Not executed. Current status: `READY_FOR_OWNER_AUTHORIZATION`. Inspect, estimate and run the
+non-network preflight first:
 
 ```bash
 adaptiveai --config adaptiveai.toml providers list
 adaptiveai --config adaptiveai.toml providers estimate --provider PROVIDER --model MODEL \
   --input-tokens 16 --max-output-tokens 8
+adaptiveai --config examples/openrouter_phase7_1.toml providers smoke-plan \
+  --provider openrouter --model inclusionai/ling-3.2-flash:free
 ```
 
 Verify provider, deployment, model, endpoint, token limit, price source/date, then obtain explicit
@@ -18,4 +21,5 @@ adaptiveai --config adaptiveai.toml chat 'Reply with: ok' --scope cloud \
 ```
 
 Streaming is a separately authorized potentially billable request. Key presence is not permission.
-Readiness: `READY_FOR_OPT_IN_LIVE_SMOKE`; external compatibility remains unverified.
+The exact proposed request is recorded in `EXTERNAL_SMOKE_AUTHORIZATION.md`. Readiness does not
+authorize execution; external compatibility remains unverified.

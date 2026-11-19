@@ -29,5 +29,10 @@ reference and whether a value exists; it performs no provider request. Aliases m
 names to allowlisted deployment IDs. Protected payload fields (`model`, `messages`, `stream`, and
 authorization) cannot be overridden through request parameters.
 
+For OpenRouter, do not use dynamic `openrouter/free` or `openrouter/auto` IDs in a compatibility
+smoke. Pin an exact model, a single upstream with `provider.only`, and set
+`provider.allow_fallbacks = false`. See `examples/openrouter_phase7_1.toml`. Its price is a dated
+snapshot and must be rechecked immediately before any separately authorized request.
+
 Local development servers require `hosted_mode = false`, `allow_localhost = true`, and a localhost
 base URL. Do not use these flags in hosted deployments.

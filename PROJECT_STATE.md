@@ -189,3 +189,11 @@ explainable deterministic Auto V0, Economy/Manual modes, task-understanding abst
 eligibility-first selection, strict comparable-evidence rules, dry-run explanations, atomic budget
 reservations and a zero-cost cloud-only quick start. Examples use explicitly synthetic evidence.
 External providers remain unvalidated and no routing superiority claim is made.
+
+# Phase 7.1 status (2026-11-19)
+
+Phase 7 is preserved in local commit `a13e808`. Phase 7.1 prepares an exact, zero-price OpenRouter
+candidate with one pinned upstream, provider fallback disabled, and a non-network fail-closed smoke
+preflight. No external inference was authorized or executed; spend is USD 0. Status is
+`READY_FOR_OWNER_AUTHORIZATION`. Current version remains 0.1.0; v0.2.0a1 is only a developer-preview
+proposal. Phase 8 was not started.

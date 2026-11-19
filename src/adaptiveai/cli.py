@@ -44,6 +44,11 @@ def parser() -> argparse.ArgumentParser:
     estimate.add_argument("--model", required=True)
     estimate.add_argument("--input-tokens", type=int, required=True)
     estimate.add_argument("--max-output-tokens", type=int, required=True)
+    smoke_plan = providers_sub.add_parser("smoke-plan")
+    smoke_plan.add_argument("--provider", required=True)
+    smoke_plan.add_argument("--model", required=True)
+    smoke_plan.add_argument("--input-tokens", type=int, default=16)
+    smoke_plan.add_argument("--max-output-tokens", type=int, default=8)
     route = sub.add_parser("route")
     route_sub = route.add_subparsers(dest="route_command", required=True)
     explain = route_sub.add_parser("explain")
@@ -163,6 +168,24 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "providers":
         import os
 
+        if args.providers_command == "smoke-plan":
+            from adaptiveai.cloud import external_smoke_plan
+
+            if args.input_tokens < 0 or args.max_output_tokens < 0:
+                raise ValueError("token estimates must be non-negative")
+            matches = [
+                item for item in product_config.cloud_providers if item.provider_id == args.provider
+            ]
+            if len(matches) != 1:
+                raise ValueError("smoke-plan requires one configured provider")
+            result = external_smoke_plan(
+                matches[0],
+                args.model,
+                input_tokens=args.input_tokens,
+                max_output_tokens=args.max_output_tokens,
+            )
+            print(json.dumps(result, indent=2))
+            return 0 if result["status"] == "READY_FOR_OWNER_AUTHORIZATION" else 2
         if args.providers_command == "estimate":
             if args.input_tokens < 0 or args.max_output_tokens < 0:
                 raise ValueError("token estimates must be non-negative")

@@ -22,6 +22,7 @@ from adaptiveai.cloud import (
     OpenAICompatibleProvider,
     ProviderTimeoutError,
     RateLimitError,
+    external_smoke_plan,
     validate_endpoint,
 )
 from adaptiveai.cloud_gateway import CloudGateway
@@ -102,6 +103,41 @@ def test_configuration_endpoint_and_capability_guards():
         allowed_hosts=(),
     )
     validate_endpoint(local, resolver=loopback_resolver)
+
+
+def test_external_smoke_plan_is_non_executing_and_fail_closed():
+    pinned = provider_config(
+        provider_id="openrouter",
+        deployment_id="free-pinned",
+        permitted_models=("vendor/exact:free",),
+        pricing=(
+            ModelPricing(
+                model="vendor/exact:free",
+                input_per_million=0,
+                output_per_million=0,
+                source="official snapshot",
+                retrieved_at="2026-11-19",
+            ),
+        ),
+        request_parameters={
+            "provider": {
+                "only": ["Pinned Upstream"],
+                "allow_fallbacks": False,
+                "data_collection": "deny",
+            }
+        },
+    )
+    plan = external_smoke_plan(pinned, "vendor/exact:free", input_tokens=16, max_output_tokens=8)
+    assert plan["status"] == "READY_FOR_OWNER_AUTHORIZATION"
+    assert plan["authorization"] == "NOT_AUTHORIZED"
+    assert plan["executes_inference"] is False
+    assert plan["worst_case_estimated_usd"] == 0
+    assert plan["checks"]["data_collection_denied"] is True
+
+    generic = pinned.model_copy(update={"permitted_models": ("openrouter/free",), "pricing": ()})
+    blocked = external_smoke_plan(generic, "openrouter/free", input_tokens=16, max_output_tokens=8)
+    assert blocked["status"] == "BLOCKED"
+    assert blocked["checks"]["exact_non_router_model"] is False
 
 
 def test_provider_discovery_completion_stream_and_usage(monkeypatch):
