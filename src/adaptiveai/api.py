@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
+from adaptiveai import __version__
 from adaptiveai.auto_routing import AutoRoutingPolicy, InsufficientEvidenceError
 from adaptiveai.cloud import ProviderError
 from adaptiveai.cloud_gateway import CloudGateway
@@ -206,7 +207,7 @@ def make_handler(service: ProductService, config: ProductConfig):
     semaphore = threading.BoundedSemaphore(config.max_concurrency)
 
     class Handler(BaseHTTPRequestHandler):
-        server_version = "AdaptiveAI/0.1.0"
+        server_version = f"AdaptiveAI/{__version__}"
 
         def _json(self, status: int, payload: dict[str, object]) -> None:
             body = json.dumps(payload).encode()

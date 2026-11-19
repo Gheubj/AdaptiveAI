@@ -1,0 +1,16 @@
+name: Feature request
+description: Suggest a focused provider, documentation, packaging, or evaluation improvement.
+title: "[Feature]: "
+body:
+  - type: textarea
+    attributes:
+      label: Developer problem
+      description: Explain the external developer workflow this would improve.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed scope and validation
+      description: Describe the smallest change and how it can be tested offline.
+    validations:
+      required: true

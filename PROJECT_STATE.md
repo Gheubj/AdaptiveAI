@@ -220,3 +220,11 @@ explicit request/ledger currency; mixed currencies are rejected without FX conve
 104/413 RUB per-million prices were refreshed. Offline provider, error, budget and URL-contract
 tests pass. `PROXYAPI_API_KEY` is absent, so authenticated preflight and inference were not attempted;
 status is `BLOCKED_BY_MISSING_CREDENTIALS`. Earlier provider reports remain historical and unchanged.
+
+# Developer Preview 0.2.0a1 release candidate (2026-11-19)
+
+The owner authorized and consumed exactly one ProxyAPI basic completion: response `ok`, measured
+latency 0.7832 seconds, no retry/fallback, and 0.001661 RUB confirmed by the provider-key budget.
+This validates only basic non-streaming completion. Version 0.2.0a1 now packages Phases 6A–7.1 for
+external review. Local Python 3.12 verification passed; Python 3.11 remains pending CI. No push, tag,
+release, PyPI upload or new research phase has been authorized.

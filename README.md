@@ -1,6 +1,6 @@
 # AdaptiveAI
 
-**AdaptiveAI 0.1.0 is an experimental research-oriented local and BYOK LLM gateway.**
+**AdaptiveAI 0.2.0a1 is an experimental Developer Preview for local and BYOK LLM routing.**
 
 AdaptiveAI is an **experimental, local-first LLM routing framework**. It provides one observable
 interface for llama.cpp models and selects eligible models by measured latency, validation-defined
@@ -8,7 +8,14 @@ quality, a documented balanced objective, or hardware constraints.
 
 AdaptiveAI is not a proven universal inference optimizer and is not production hardened.
 
-## Features
+Use it to put local llama.cpp deployments and explicitly configured OpenAI-compatible cloud
+providers behind one observable gateway, enforce eligibility and budget constraints, and inspect
+why the deterministic Auto V0 baseline selected or rejected a deployment.
+
+It is not a production-ready public multi-user gateway, a universal model leaderboard, or proof
+that automatic routing beats simple baselines. Auto V0 can return `INSUFFICIENT_EVIDENCE`.
+
+## What works in this preview
 
 - OpenAI-style `/v1/models` and `/v1/chat/completions` subset with SSE streaming
 - Fastest, Quality, Balanced, experimental Hardware-Aware, and explicit-model modes
@@ -21,20 +28,20 @@ AdaptiveAI is not a proven universal inference optimizer and is not production h
 - explainable deterministic Auto V0, Economy/Manual policies, dry-run routing, and a zero-cost
   localhost test provider (Phase 7 development branch)
 
-## Installation
+## Install and try it offline
 
 Python 3.11 and 3.12 are supported.
 
 ```bash
 python -m venv .venv
-.venv/bin/pip install -e '.[local]'
-cp adaptiveai.example.toml adaptiveai.toml
-adaptiveai doctor
+. .venv/bin/activate
+python -m pip install adaptiveai-0.2.0a1-py3-none-any.whl
+adaptiveai --version
 ```
 
-Build or provide `llama-server`, then configure compatible GGUF files in
-`data/local_model_registry.json`. AdaptiveAI never downloads model weights automatically. Research
-environments use `pip install -e '.[research,test,dev]'`.
+Until the preview is published, replace the wheel path with the locally built artifact. The fully
+offline, no-key first run—including Manual, Auto V0, explanations, streaming and local-only
+rejection—is in [Developer Preview Quick Start](docs/DEVELOPER_PREVIEW_QUICKSTART.md).
 
 ## Quick start
 
@@ -63,17 +70,9 @@ deployment-specific; unknown pricing is never treated as zero. No cloud call is 
 The fully offline Developer Alpha walkthrough is in
 [`docs/DEVELOPER_ALPHA_QUICKSTART.md`](docs/DEVELOPER_ALPHA_QUICKSTART.md).
 
-Phase 7.1 adds a no-network external-provider preflight. The pinned OpenRouter example does not
-grant permission to infer:
-
-```bash
-adaptiveai --config examples/openrouter_phase7_1.toml providers smoke-plan \
-  --provider openrouter --model inclusionai/ling-3.2-flash:free
-```
-
-It must report `authorization: NOT_AUTHORIZED`. See the
-[Developer Preview quick start](docs/DEVELOPER_PREVIEW_QUICKSTART.md) and
-[authorization record](docs/EXTERNAL_SMOKE_AUTHORIZATION.md). No external smoke was executed.
+Phase 7.1 externally verified exactly one basic non-streaming ProxyAPI completion. That narrow check
+does not validate external streaming, tools, concurrency, reliability, savings, or broad provider
+compatibility. See the [provider matrix](docs/PROVIDER_COMPATIBILITY_MATRIX.md).
 
 ```bash
 curl http://127.0.0.1:8088/v1/chat/completions \

@@ -2,9 +2,9 @@
 
 Date: 2026-11-19
 
-Status: **BLOCKED_BY_MISSING_CREDENTIALS**
+Status: **EXTERNAL_PROVIDER_VALIDATED**
 
-External inference validation: **not performed**.
+External inference validation: **performed exactly once**.
 
 ## Prepared operation
 
@@ -20,7 +20,7 @@ External inference validation: **not performed**.
 | Maximum output | 16 tokens |
 | Tools / fallback / retries | none / none / none |
 | Proposed request ceiling | 5 RUB |
-| Inference authorization | **NOT_AUTHORIZED** |
+| Inference authorization | explicitly authorized and consumed for exactly one request |
 
 The example is `examples/proxyapi_phase7_1.toml`. No credential or private account metadata is
 stored in it. The existing provider-independent OpenAI-compatible adapter is reused; no ProxyAPI SDK
@@ -74,21 +74,31 @@ and is not claimed as executed here.
 
 ## Read-only preflight
 
-The environment check returned `PROXYAPI_API_KEY_PRESENT=False`. The value was not read, printed,
-logged or written. Therefore these mandatory account facts remain unknown:
+The owner supplied a newly entered credential through a hidden interactive terminal prompt. The
+environment check returned `PROXYAPI_API_KEY_PRESENT=true`; the value was not printed, logged,
+written to disk or included in a command argument.
 
-- whether the key is valid and restricted to `openai/gpt-4.1-mini`;
-- whether its one-time provider-side budget is exactly 5 RUB;
-- whether balance-read permission is enabled;
-- remaining key budget or account balance;
-- authenticated `GET /v1/models` availability for this key;
-- account-level request logging and retention configuration;
-- IP allowlist compatibility with this execution host.
+After an initial rejected credential was replaced and its balance permission enabled, authenticated,
+read-only metadata preflight was repeated with redirects disabled, a 15-second timeout and a
+one-megabyte response bound. The final results were:
+
+- `GET https://api.proxyapi.ru/v1/models` returned HTTP 200 and included exact model
+  `openai/gpt-4.1-mini`;
+- `GET https://api.proxyapi.ru/proxyapi/balance` returned HTTP 200 and reported a 5.0 RUB key budget
+  with 0.0 RUB used.
+
+No response body was logged. The successful model listing validates the credential and exact-model
+access. The balance endpoint independently validates the provider-side spending ceiling and unused
+starting state. The owner stated that all requested key restrictions were configured, including the
+exact-model restriction. Account-level request logging and retention are not exposed by these API
+responses and remain owner-controlled Console settings.
+
+The successful authenticated model request confirms that the current execution host is compatible
+with the configured IP restriction, if one is enabled.
 
 ProxyAPI documents `GET /proxyapi/balance` as permission-gated and states that a budgeted key returns
-its remaining key budget instead of the full account balance. No permission was changed and no
-authenticated request was attempted. The owner must confirm the model allowlist and one-time 5 RUB
-budget in Console if the key lacks balance permission.
+its remaining key budget instead of the full account balance. The final response confirmed the
+dedicated 5 RUB key budget without requiring disclosure of the full account balance.
 
 ProxyAPI also documents optional account-wide full request/response logging, including prompts and
 outputs, with configurable retention and possible logging charges. Its state cannot be inferred
@@ -107,19 +117,56 @@ time; it is not network-layer SSRF protection. Setting `strict_ssrf_protection=t
 fail closed because the current transport lacks connection pinning or an egress firewall. This
 limitation was not weakened or described as production-hardened security.
 
-The current endpoint preflight accepted HTTPS, matched the exact hostname allowlist, resolved only
-public addresses, and constructed the correct versioned path. It performed no HTTP request or TLS
-handshake and is not evidence of live provider compatibility.
+The initial offline endpoint preflight accepted HTTPS, matched the exact hostname allowlist,
+resolved only public addresses, and constructed the correct versioned path. That check itself
+performed no HTTP request or TLS handshake; the later authenticated metadata and single inference
+request provide the live compatibility evidence documented below.
+
+## Live validation result
+
+After successful preflight, the owner explicitly authorized exactly one non-streaming inference
+request with the prepared prompt, exact model, 16-token maximum, no retry or fallback and a 5 RUB
+ceiling. The command used the real AdaptiveAI Gateway CLI and the checked-in ProxyAPI configuration;
+it did not call a provider SDK directly.
+
+| Field | Observed result |
+|---|---|
+| Gateway/provider | AdaptiveAI Gateway → ProxyAPI |
+| Requested model | `openai/gpt-4.1-mini` |
+| Selected model | `openai/gpt-4.1-mini` |
+| Provider | `proxyapi` |
+| Prompt | `Reply with exactly: ok` |
+| Returned text | `ok` |
+| Completion success / HTTP interpretation | successful completion; HTTP success implied, raw status not surfaced by CLI |
+| Maximum output tokens | 16 |
+| Token counts | not surfaced by the current CLI output |
+| Measured latency | 0.7832133880001493 seconds |
+| Pre-request estimate | 0.007648 RUB |
+| Provider-usage actual cost | 0.001661 RUB |
+| Post-request key-budget usage | 0.001661 RUB of 5.0 RUB |
+| Usage source | `provider` |
+| Fallback | none (`fallback_reason: null`) |
+| Retry | none |
+
+The post-request read-only balance check independently matched AdaptiveAI's reported actual cost:
+the provider-key budget changed from 0.0 RUB used to 0.001661 RUB used. The CLI reports the exact
+requested/selected model but does not expose the raw provider response's `model` field, so raw
+response-model identity is not independently claimed. No credential appeared in terminal output or
+the report.
 
 ## Request and spend record
 
 - Public documentation/catalog reads: performed without owner content or credentials.
-- Authenticated metadata requests: 0.
-- Inference requests: 0.
-- Prompt transmissions: 0.
+- Final authenticated metadata preflight: 2 read-only GET requests; both returned HTTP 200. An
+  earlier attempt returned models HTTP 200 and balance HTTP 403 before balance permission was enabled.
+- Inference requests: exactly 1.
+- Prompt transmissions: exactly 1 synthetic prompt.
 - Retries / fallbacks: 0 / 0.
-- Provider spend: 0 RUB.
-- HTTP status, actual model, response, token usage and latency: not applicable.
+- Provider spend: 0.001661 RUB, confirmed by both provider-derived gateway accounting and the
+  post-request key-budget delta.
+- Returned text: `ok`.
+- Measured latency: 0.7832133880001493 seconds.
+- Raw HTTP status, raw response model and numeric token counts were not surfaced by the CLI.
 
 ## Next gate
 
@@ -145,11 +192,11 @@ adaptiveai --config examples/proxyapi_phase7_1.toml chat 'Reply with exactly: ok
 
 This command is documentation only and was not executed.
 
-Expose the dedicated key as `PROXYAPI_API_KEY` in the environment inherited by the task; do not
-paste it into chat or a command argument. Then explicitly request read-only preflight. If API access
-cannot prove the one-time 5 RUB budget/model restriction, provide confirmation from ProxyAPI Console
-without disclosing the key or full balance. Only after every preflight item passes can the status
-become `READY_FOR_OWNER_AUTHORIZATION`; paid inference requires a separate exact authorization.
+The authorized request has been consumed and must not be repeated under the same authorization.
+ProxyAPI compatibility is externally validated for this narrow path. Account logging/retention
+remains an owner-controlled Console setting and should stay at the owner-approved value. Broader
+provider reliability, streaming, tool calls, concurrency, failure handling and benchmark quality
+remain unvalidated.
 
 No benchmark, new research phase, package-version change, billing modification, push, tag, release
 or publication occurred. Earlier OpenRouter and Groq reports remain unchanged.

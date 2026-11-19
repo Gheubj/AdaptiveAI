@@ -4,12 +4,14 @@ import argparse
 import json
 from pathlib import Path
 
+from adaptiveai import __version__
 from adaptiveai.config import Settings, configure_logging, load_product_config
 from adaptiveai.hardware import discover_hardware
 
 
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(prog="adaptiveai")
+    root.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     root.add_argument("--config", type=Path, help="TOML runtime configuration")
     sub = root.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor")

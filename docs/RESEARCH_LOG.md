@@ -202,3 +202,12 @@
   no retries/fallback, local-only and credential redaction.
 - `PROXYAPI_API_KEY` was absent; authenticated preflight, inference, prompt transfer and spend were
   all zero. Status: `BLOCKED_BY_MISSING_CREDENTIALS`.
+
+# 2026-11-19 — Developer Preview 0.2.0a1 preparation
+
+- Recorded the separately authorized single ProxyAPI completion without overstating compatibility.
+- Updated package/CLI/server metadata to PEP 440 version `0.2.0a1`.
+- Added external quick starts, feature/provider matrices, limitations and release evidence.
+- Full Python 3.12 suite passed (127 passed, 3 optional skips, 71% coverage); Python 3.11 remains
+  pending CI.
+- Built and clean-installed wheel/sdist. No additional inference, publication or research phase.
