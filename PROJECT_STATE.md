@@ -197,3 +197,8 @@ candidate with one pinned upstream, provider fallback disabled, and a non-networ
 preflight. No external inference was authorized or executed; spend is USD 0. Status is
 `READY_FOR_OWNER_AUTHORIZATION`. Current version remains 0.1.0; v0.2.0a1 is only a developer-preview
 proposal. Phase 8 was not started.
+
+The owner subsequently authorized one exact OpenRouter smoke request, but the mandatory preflight
+failed closed because `OPENROUTER_API_KEY` was not present in the task process environment. No
+authenticated request or inference was sent, the prompt was not disclosed, and cost remained USD
+0.00. External validation therefore remains incomplete.

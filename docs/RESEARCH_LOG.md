@@ -171,3 +171,13 @@
 - Added a dry-run smoke plan requiring one upstream, disabled fallback and a zero-USD dated price.
 - External inference authorization remained `NOT_AUTHORIZED`; requests and spend were zero.
 - Proposed v0.2.0a1 only; no version change, push, tag, release, PyPI upload or Phase 8 work.
+
+# 2026-11-19 — Phase 7.1 authorized live-smoke preflight
+
+- Received authorization for exactly one non-streaming OpenRouter request to the pinned free model
+  and Ant Digital upstream with an eight-token cap and USD 0 budget.
+- Refreshed public availability, pricing, upstream and routing/privacy constraint evidence.
+- The process environment did not contain `OPENROUTER_API_KEY`; mandatory authenticated account,
+  quota and privacy checks could not run.
+- Failed closed before inference: authenticated requests 0, inference requests 0, prompt transfers
+  0, retries 0 and spend USD 0.00.

@@ -1,6 +1,6 @@
 # External Smoke Authorization Record
 
-Status: **NOT_AUTHORIZED**
+Status: **AUTHORIZED ON 2026-11-19; BLOCKED AT PREFLIGHT BEFORE INFERENCE**
 
 Prepared: 2026-11-19
 
@@ -29,5 +29,8 @@ model, provider, request count, stream setting, prompt category, or cost require
 
 ## Results
 
-Not applicable: the gate has not been authorized. This is an expected Phase 7.1 outcome, not a
-failed provider experiment.
+The owner authorized the exact operation above. Execution stopped before inference because
+`OPENROUTER_API_KEY` was absent from the process environment, preventing mandatory authenticated
+account/quota/privacy checks. See `PHASE7_1_LIVE_SMOKE_REPORT.md`. The authorization was not consumed
+by an inference request; any resumed execution must repeat the full preflight under the same exact
+limits.
