@@ -41,6 +41,7 @@ class ChatPayload(BaseModel):
     provider_allowlist: tuple[str, ...] = ()
     max_estimated_cost: float | None = Field(None, ge=0)
     max_total_cost: float | None = Field(None, ge=0)
+    cost_currency: str | None = Field(None, pattern=r"^[A-Z]{3}$")
     strict_budget: bool = True
     fallback_models: tuple[str, ...] = ()
     required_capabilities: frozenset[str] = frozenset({"text"})
@@ -134,6 +135,7 @@ class ProductService:
             provider_allowlist=payload.provider_allowlist,
             max_estimated_cost=payload.max_estimated_cost,
             max_total_cost=payload.max_total_cost,
+            cost_currency=payload.cost_currency,
             strict_budget=payload.strict_budget,
             fallback_models=payload.fallback_models,
             required_capabilities=payload.required_capabilities,

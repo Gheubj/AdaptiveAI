@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from collections.abc import Iterator
 from dataclasses import replace
+from decimal import Decimal
 
 from adaptiveai.cloud import (
     BudgetError,
@@ -91,10 +92,14 @@ class CloudGateway:
             if request.strict_budget:
                 raise BudgetError("strict budget mode rejects missing pricing")
             return None
-        if estimate.currency != "USD":
-            raise BudgetError("budget comparison currently requires USD pricing")
+        expected_currency = request.cost_currency or "USD"
+        if estimate.currency != expected_currency:
+            raise BudgetError(
+                f"budget currency {expected_currency} does not match pricing currency "
+                f"{estimate.currency}"
+            )
         if request.max_total_cost is not None:
-            self.ledger.max_total = request.max_total_cost
+            self.ledger.max_total = Decimal(str(request.max_total_cost))
         self.ledger.authorize(estimate, request.max_estimated_cost)
         return estimate
 
@@ -154,6 +159,7 @@ class CloudGateway:
                 result.usage.source,
                 estimate.amount if estimate else None,
                 price,
+                estimate.currency if estimate else None,
             )
             self.ledger.record(record)
             diagnostics = RoutingDiagnostics(
@@ -165,8 +171,9 @@ class CloudGateway:
                 experimental=True,
                 constraints={"provider_scope": request.provider_scope.value, "local_only": False},
                 provider=result.provider,
-                estimated_cost=estimate.amount if estimate else None,
-                actual_cost=price,
+                estimated_cost=float(estimate.amount) if estimate else None,
+                actual_cost=float(price) if price is not None else None,
+                cost_currency=estimate.currency if estimate else None,
                 usage_source=result.usage.source,
             )
             return InferenceResponse(
@@ -192,6 +199,7 @@ class CloudGateway:
                     "unreported",
                     estimate.amount if estimate else None,
                     None,
+                    estimate.currency if estimate else None,
                 )
             )
             raise
@@ -227,6 +235,7 @@ class CloudGateway:
                     "unreported",
                     estimate.amount if estimate else None,
                     None,
+                    estimate.currency if estimate else None,
                 )
             )
             return
@@ -239,7 +248,8 @@ class CloudGateway:
             experimental=True,
             constraints={"provider_scope": request.provider_scope.value, "local_only": False},
             provider=provider.provider_id,
-            estimated_cost=estimate.amount if estimate else None,
+            estimated_cost=float(estimate.amount) if estimate else None,
+            cost_currency=estimate.currency if estimate else None,
             usage_source="provider" if usage else "unreported",
         )
         actual_cost = None
@@ -268,6 +278,7 @@ class CloudGateway:
                 "provider" if usage else "unreported",
                 estimate.amount if estimate else None,
                 actual_cost,
+                estimate.currency if estimate else None,
             )
         )
         yield {

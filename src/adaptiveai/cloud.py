@@ -10,6 +10,7 @@ import uuid
 from collections import deque
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
+from decimal import Decimal
 from enum import StrEnum
 from typing import Any, Protocol
 from urllib.parse import urlparse
@@ -80,9 +81,9 @@ class CapabilityState(StrEnum):
 class ModelPricing(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     model: str
-    input_per_million: float = Field(ge=0)
-    output_per_million: float = Field(ge=0)
-    currency: str = "USD"
+    input_per_million: Decimal = Field(ge=0)
+    output_per_million: Decimal = Field(ge=0)
+    currency: str = Field("USD", pattern=r"^[A-Z]{3}$")
     source: str
     retrieved_at: str
 
@@ -174,7 +175,7 @@ def external_smoke_plan(
     if price and input_tokens >= 0 and max_output_tokens >= 0:
         estimate = (
             input_tokens * price.input_per_million + max_output_tokens * price.output_per_million
-        ) / 1_000_000
+        ) / Decimal(1_000_000)
     return {
         "status": "READY_FOR_OWNER_AUTHORIZATION" if all(checks.values()) else "BLOCKED",
         "executes_inference": False,
@@ -188,7 +189,7 @@ def external_smoke_plan(
         "prompt_category": "synthetic compatibility phrase; no private or research data",
         "input_tokens_estimate": input_tokens,
         "max_output_tokens": max_output_tokens,
-        "worst_case_estimated_usd": estimate,
+        "worst_case_estimated_usd": float(estimate) if estimate is not None else None,
         "pricing_source": price.source if price else None,
         "pricing_retrieved_at": price.retrieved_at if price else None,
         "pricing_is_guaranteed_bill": False,
@@ -272,9 +273,12 @@ class CostEstimate:
     currency: str
     input_tokens: int
     max_output_tokens: int
-    amount: float
+    amount: Decimal
     pricing_source: str
     pricing_retrieved_at: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "amount", Decimal(str(self.amount)))
 
 
 @dataclass(frozen=True)
@@ -288,39 +292,52 @@ class UsageRecord:
     prompt_tokens: int | None
     completion_tokens: int | None
     usage_source: str
-    estimated_cost: float | None
-    actual_cost: float | None
+    estimated_cost: Decimal | None
+    actual_cost: Decimal | None
+    currency: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.estimated_cost is not None:
+            object.__setattr__(self, "estimated_cost", Decimal(str(self.estimated_cost)))
+        if self.actual_cost is not None:
+            object.__setattr__(self, "actual_cost", Decimal(str(self.actual_cost)))
 
 
 @dataclass
 class BudgetLedger:
-    max_total: float | None = None
-    committed: float = 0.0
-    reserved: float = 0.0
+    max_total: Decimal | None = None
+    currency: str | None = None
+    committed: Decimal = Decimal("0")
+    reserved: Decimal = Decimal("0")
     records: list[UsageRecord] = field(default_factory=list)
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
-    def authorize(self, estimate: CostEstimate, per_request: float | None) -> None:
+    def authorize(self, estimate: CostEstimate, per_request: Decimal | float | None) -> None:
         with self._lock:
-            if per_request is not None and estimate.amount > per_request:
+            if self.currency is not None and self.currency != estimate.currency:
+                raise BudgetError("budget ledger rejects mixed currencies")
+            self.currency = estimate.currency
+            request_limit = Decimal(str(per_request)) if per_request is not None else None
+            total_limit = Decimal(str(self.max_total)) if self.max_total is not None else None
+            if request_limit is not None and estimate.amount > request_limit:
                 raise BudgetError("estimated request cost exceeds the configured request budget")
             if (
-                self.max_total is not None
-                and self.committed + self.reserved + estimate.amount > self.max_total
+                total_limit is not None
+                and self.committed + self.reserved + estimate.amount > total_limit
             ):
                 raise BudgetError("estimated request cost exceeds the configured total budget")
             self.reserved += estimate.amount
 
-    def release(self, amount: float | None) -> None:
+    def release(self, amount: Decimal | float | None) -> None:
         if amount is None:
             return
         with self._lock:
-            self.reserved = max(0.0, self.reserved - amount)
+            self.reserved = max(Decimal("0"), self.reserved - Decimal(str(amount)))
 
     def record(self, record: UsageRecord) -> None:
         with self._lock:
             if record.estimated_cost is not None:
-                self.reserved = max(0.0, self.reserved - record.estimated_cost)
+                self.reserved = max(Decimal("0"), self.reserved - record.estimated_cost)
             self.records.append(record)
             if record.status == "succeeded":
                 if record.actual_cost is not None:
@@ -420,7 +437,7 @@ class OpenAICompatibleProvider:
             return None
         amount = (
             input_tokens * price.input_per_million + max_output_tokens * price.output_per_million
-        ) / 1_000_000
+        ) / Decimal(1_000_000)
         return CostEstimate(
             resolved,
             price.currency,
@@ -576,7 +593,7 @@ class OpenAICompatibleProvider:
         code = response.status_code
         if code < 400:
             return
-        if code in {401, 403}:
+        if code == 401:
             raise AuthenticationError("provider rejected authentication")
         if code == 402:
             raise InsufficientCreditsError("provider reported insufficient credits")

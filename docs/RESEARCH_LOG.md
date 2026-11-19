@@ -191,3 +191,14 @@
   absent, so account/model/privacy checks could not run.
 - Strict zero-budget authorization cannot represent the unverified Free entitlement without
   falsifying pricing; inference, retries, prompt transfers and spend remained zero.
+
+# 2026-11-19 — Phase 7.1 ProxyAPI preparation
+
+- Verified the current official exact model and 104/413 RUB per-million pricing including VAT.
+- Reused the provider-independent adapter and its documented `/v1` base-URL support.
+- Extended strict budgeting with Decimal arithmetic, explicit currencies and mixed-currency refusal;
+  no exchange rate or zero-price fiction was introduced.
+- Added an offline ProxyAPI contract covering request shape, usage, reservations, typed failures,
+  no retries/fallback, local-only and credential redaction.
+- `PROXYAPI_API_KEY` was absent; authenticated preflight, inference, prompt transfer and spend were
+  all zero. Status: `BLOCKED_BY_MISSING_CREDENTIALS`.

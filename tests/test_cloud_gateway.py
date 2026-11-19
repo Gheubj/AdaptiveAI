@@ -17,10 +17,13 @@ from adaptiveai.cloud import (
     CloudProviderConfig,
     CostEstimate,
     DeterministicOpenAITransport,
+    InsufficientCreditsError,
+    InvalidProviderRequestError,
     MalformedResponseError,
     ModelPricing,
     OpenAICompatibleProvider,
     ProviderTimeoutError,
+    ProviderUnavailableError,
     RateLimitError,
     external_smoke_plan,
     validate_endpoint,
@@ -170,6 +173,123 @@ def test_documented_versioned_base_url_is_not_duplicated(monkeypatch):
     assert provider.discover_models() == ("mock-model",)
     assert paths == ["/openai/v1/models"]
     provider.close()
+
+
+def test_proxyapi_offline_contract_currency_budget_errors_and_no_retry(monkeypatch):
+    monkeypatch.setenv("PROXYAPI_API_KEY", "proxy-secret-fixture")
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "openai/gpt-4.1-mini"}]})
+        payload = json.loads(request.content)
+        marker = payload["messages"][-1]["content"]
+        statuses = {
+            "AUTH": 401,
+            "BALANCE": 402,
+            "RESTRICTED": 403,
+            "RATE": 429,
+            "UPSTREAM": 502,
+            "TIMEOUT": 504,
+        }
+        if marker in statuses:
+            return httpx.Response(statuses[marker], json={"error": "redacted fixture"})
+        usage = {} if marker == "NO_USAGE" else {"prompt_tokens": 7, "completion_tokens": 1}
+        return httpx.Response(
+            200,
+            json={
+                "id": "proxy-fixture-id",
+                "model": "openai/gpt-4.1-mini",
+                "choices": [{"message": {"content": "ok"}}],
+                "usage": usage,
+            },
+        )
+
+    config = CloudProviderConfig(
+        provider_id="proxyapi",
+        deployment_id="proxyapi-unified-v1",
+        base_url="https://api.proxyapi.ru/v1",
+        api_key_env="PROXYAPI_API_KEY",
+        permitted_models=("openai/gpt-4.1-mini",),
+        allowed_hosts=("api.proxyapi.ru",),
+        timeout_seconds=30,
+        connect_timeout_seconds=5,
+        max_response_bytes=2048,
+        max_requests_per_minute=30,
+        pricing=(
+            ModelPricing(
+                model="openai/gpt-4.1-mini",
+                input_per_million="104",
+                output_per_million="413",
+                currency="RUB",
+                source="official ProxyAPI catalog fixture",
+                retrieved_at="2026-11-19",
+            ),
+        ),
+    )
+    provider = OpenAICompatibleProvider(
+        config, transport=httpx.MockTransport(handler), resolver=public_resolver
+    )
+    assert provider.discover_models() == ("openai/gpt-4.1-mini",)
+    assert calls[-1].url.path == "/v1/models"
+    assert calls[-1].headers["Authorization"] == "Bearer proxy-secret-fixture"
+    estimate = provider.estimate("openai/gpt-4.1-mini", 16, 16)
+    assert str(estimate.amount) == "0.008272"
+    assert estimate.currency == "RUB"
+
+    gateway = CloudGateway((provider,))
+
+    def request(text="hello", **updates):
+        values = {
+            "messages": (ChatMessage("user", text),),
+            "model": "openai/gpt-4.1-mini",
+            "local_only": False,
+            "provider_scope": ProviderScope.CLOUD,
+            "provider": "proxyapi",
+            "max_tokens": 16,
+            "max_estimated_cost": 5,
+            "cost_currency": "RUB",
+        }
+        values.update(updates)
+        return InferenceRequest(**values)
+
+    with pytest.raises(BudgetError, match="currency"):
+        gateway.complete(request(cost_currency="USD"))
+    with pytest.raises(BudgetError, match="request budget"):
+        gateway.complete(request(max_estimated_cost=0))
+    with pytest.raises(ValueError, match="local-only"):
+        gateway.complete(request(local_only=True))
+
+    result = gateway.complete(request())
+    assert result.text == "ok"
+    assert result.diagnostics.cost_currency == "RUB"
+    assert result.diagnostics.actual_cost == pytest.approx(0.001141)
+    assert gateway.ledger.currency == "RUB"
+    assert gateway.ledger.reserved == 0
+
+    no_usage = gateway.complete(request("NO_USAGE"))
+    assert no_usage.diagnostics.usage_source == "unreported"
+
+    errors = (
+        ("AUTH", AuthenticationError),
+        ("BALANCE", InsufficientCreditsError),
+        ("RESTRICTED", InvalidProviderRequestError),
+        ("RATE", RateLimitError),
+        ("UPSTREAM", ProviderUnavailableError),
+        ("TIMEOUT", ProviderTimeoutError),
+    )
+    for marker, error_type in errors:
+        before = len(calls)
+        with pytest.raises(error_type) as error:
+            gateway.complete(request(marker))
+        assert len(calls) == before + 1
+        assert "proxy-secret-fixture" not in str(error.value)
+        assert gateway.ledger.reserved == 0
+
+    assert all(json.loads(call.content).get("stream") is False for call in calls[1:])
+    assert all(json.loads(call.content)["model"] == "openai/gpt-4.1-mini" for call in calls[1:])
+    gateway.close()
 
 
 def test_typed_errors_are_redacted(monkeypatch):
@@ -402,4 +522,4 @@ retrieved_at = "2026-11-19"
         == 0
     )
     estimate = capsys.readouterr().out
-    assert '"worst_case_estimate": 5e-05' in estimate
+    assert '"worst_case_estimate": "0.00005"' in estimate

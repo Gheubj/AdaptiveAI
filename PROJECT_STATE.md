@@ -211,3 +211,12 @@ inference request was made. Standard published pricing is truthfully recorded as
 and USD 0.30/M output; the current strict price-based gateway cannot independently represent a
 Free-tier entitlement under an authorized USD 0 budget. Status: `BLOCKED_BY_BUDGET` (with account
 preflight also blocked until `GROQ_API_KEY` is inherited by the process).
+
+# Phase 7.1 ProxyAPI preparation status (2026-11-19)
+
+A minimal ProxyAPI profile reuses the existing gateway at the current `/v1` endpoint and exact
+`openai/gpt-4.1-mini` identifier. RUB pricing is represented with exact Decimal arithmetic and
+explicit request/ledger currency; mixed currencies are rejected without FX conversion. Official
+104/413 RUB per-million prices were refreshed. Offline provider, error, budget and URL-contract
+tests pass. `PROXYAPI_API_KEY` is absent, so authenticated preflight and inference were not attempted;
+status is `BLOCKED_BY_MISSING_CREDENTIALS`. Earlier provider reports remain historical and unchanged.

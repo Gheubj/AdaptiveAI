@@ -35,6 +35,7 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument("--scope", choices=["local", "cloud", "hybrid"], default="local")
     command.add_argument("--provider")
     command.add_argument("--max-estimated-cost", type=float)
+    command.add_argument("--cost-currency", choices=["USD", "RUB"])
     command.add_argument("--allow-paid-cloud", action="store_true")
     providers = sub.add_parser("providers")
     providers_sub = providers.add_subparsers(dest="providers_command", required=True)
@@ -60,6 +61,7 @@ def parser() -> argparse.ArgumentParser:
     explain.add_argument("--local-only", action="store_true")
     explain.add_argument("--max-tokens", type=int, default=64)
     explain.add_argument("--max-estimated-cost", type=float)
+    explain.add_argument("--cost-currency", choices=["USD", "RUB"])
     command = sub.add_parser("import-archive")
     command.add_argument("archive", type=Path)
     command.add_argument("--raw-dir", type=Path)
@@ -161,6 +163,7 @@ def main(argv: list[str] | None = None) -> int:
             local_only=args.local_only,
             max_tokens=args.max_tokens,
             max_estimated_cost=args.max_estimated_cost,
+            cost_currency=args.cost_currency,
         )
         decision = router.explain(request)
         print(decision.model_dump_json(indent=2))
@@ -211,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
                         "deployment": config.deployment_id or config.base_url,
                         "model": model,
                         "currency": price.currency,
-                        "worst_case_estimate": amount,
+                        "worst_case_estimate": str(amount),
                         "pricing_source": price.source,
                         "pricing_retrieved_at": price.retrieved_at,
                         "guaranteed_bill": False,
@@ -524,6 +527,7 @@ def main(argv: list[str] | None = None) -> int:
                 provider_scope=scope,
                 provider=args.provider,
                 max_estimated_cost=args.max_estimated_cost,
+                cost_currency=args.cost_currency,
             )
             auto_selection = auto_router.select(preflight)
             args.model = auto_selection.request.model
@@ -547,6 +551,7 @@ def main(argv: list[str] | None = None) -> int:
                 provider_scope=scope,
                 provider=args.provider,
                 max_estimated_cost=args.max_estimated_cost,
+                cost_currency=args.cost_currency,
             )
             try:
                 if args.stream:

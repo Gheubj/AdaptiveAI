@@ -44,6 +44,7 @@ class InferenceRequest:
     provider_allowlist: tuple[str, ...] = ()
     max_estimated_cost: float | None = None
     max_total_cost: float | None = None
+    cost_currency: str | None = None
     strict_budget: bool = True
     fallback_models: tuple[str, ...] = ()
     required_capabilities: frozenset[str] = frozenset({"text"})
@@ -66,6 +67,7 @@ class RoutingDiagnostics:
     provider: str = "local"
     estimated_cost: float | None = None
     actual_cost: float | None = None
+    cost_currency: str | None = None
     usage_source: str | None = None
     explanation: dict[str, object] | None = None
 

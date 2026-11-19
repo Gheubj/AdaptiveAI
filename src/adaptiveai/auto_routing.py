@@ -54,6 +54,7 @@ class AutoCandidate(BaseModel):
     context_tokens: int | None = Field(None, ge=1)
     input_per_million: float | None = Field(None, ge=0)
     output_per_million: float | None = Field(None, ge=0)
+    currency: str = Field("USD", pattern=r"^[A-Z]{3}$")
     latency_p95_seconds: float | None = Field(None, ge=0)
     evidence: tuple[AutoEvidence, ...] = ()
 
@@ -179,6 +180,9 @@ class AutoRoutingPolicy:
             reasons.append("PROVIDER_NOT_ALLOWED")
         if request.provider and candidate.provider != request.provider:
             reasons.append("PROVIDER_NOT_ALLOWED")
+        expected_currency = request.cost_currency or "USD"
+        if not candidate.local and candidate.currency != expected_currency:
+            reasons.append("CURRENCY_MISMATCH")
         if request.required_capabilities - candidate.capabilities:
             reasons.append("REQUIRED_CAPABILITY_UNKNOWN_OR_UNSUPPORTED")
         if request.minimum_context_tokens is not None:
