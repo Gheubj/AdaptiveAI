@@ -24,9 +24,9 @@ that automatic routing beats simple baselines. Auto V0 can return `INSUFFICIENT_
 - CPU-first llama.cpp backend, hardware inspection, CLI, Python client, and routing diagnostics
 - preserved reproducible research infrastructure from Phases 1–4.5
 - provider-independent BYOK cloud access with explicit provider/model selection, streaming,
-  typed errors, pricing metadata, and pre-request budgets (Phase 6G development branch)
+  typed errors, pricing metadata, and pre-request budgets
 - explainable deterministic Auto V0, Economy/Manual policies, dry-run routing, and a zero-cost
-  localhost test provider (Phase 7 development branch)
+  localhost test provider
 
 ## Install and try it offline
 
@@ -35,22 +35,20 @@ Python 3.11 and 3.12 are supported.
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-python -m pip install adaptiveai-0.2.0a1-py3-none-any.whl
+python -m pip install "git+https://github.com/Gheubj/AdaptiveAI.git@v0.2.0a1"
 adaptiveai --version
 ```
 
-Until the preview is published, replace the wheel path with the locally built artifact. The fully
-offline, no-key first run—including Manual, Auto V0, explanations, streaming and local-only
-rejection—is in [Developer Preview Quick Start](docs/DEVELOPER_PREVIEW_QUICKSTART.md).
+Alternatively, download `adaptiveai-0.2.0a1-py3-none-any.whl` from the
+[GitHub release](https://github.com/Gheubj/AdaptiveAI/releases/tag/v0.2.0a1) and install that exact
+file. The fully offline, no-key first run—including Manual, Auto V0, explanations, streaming and
+local-only rejection—is in [Developer Preview Quick Start](docs/DEVELOPER_PREVIEW_QUICKSTART.md).
 
 ## Quick start
 
-```bash
-adaptiveai hardware inspect
-adaptiveai models list
-adaptiveai chat "Reply with exactly: ready" --mode fastest
-adaptiveai serve
-```
+The recommended first run is the zero-cost localhost walkthrough in
+[Developer Preview Quick Start](docs/DEVELOPER_PREVIEW_QUICKSTART.md). It uses a public tagged source
+checkout because configuration examples are intentionally not installed into the Python package.
 
 Cloud access is opt-in. Copy the provider example from
 [`docs/PROVIDER_CONFIGURATION.md`](docs/PROVIDER_CONFIGURATION.md), export your own key, set
@@ -138,7 +136,7 @@ See [CONTRIBUTING.md](docs/CONTRIBUTING.md), [API_REFERENCE.md](docs/API_REFEREN
 
 ## Citation and license
 
-Release metadata is in `CITATION.cff`. Project code is prepared under Apache-2.0, subject to owner
-approval before publication. Model weights, llama.cpp, pretrained encoders, and research datasets
-retain their own licenses. Restricted raw data and model weights must not be published. See
+Release metadata is in `CITATION.cff`. Original project code is released under Apache-2.0. Model
+weights, llama.cpp, pretrained encoders, and research datasets retain their own licenses.
+Restricted raw data and model weights are not included. See
 `THIRD_PARTY_NOTICES.md` for the technical license inventory.
