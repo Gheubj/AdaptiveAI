@@ -1,0 +1,67 @@
+[adaptiveai]
+local_only = false
+host = "127.0.0.1"
+port = 8088
+auto_uncertainty_policy = "error"
+
+[[adaptiveai.cloud_providers]]
+provider_id = "local-e2e"
+deployment_id = "localhost-fixture"
+base_url = "http://127.0.0.1:8099"
+api_key_env = "ADAPTIVEAI_E2E_KEY"
+permitted_models = ["local-e2e", "fallback"]
+hosted_mode = false
+allow_localhost = true
+timeout_seconds = 5
+
+[[adaptiveai.cloud_providers.pricing]]
+model = "local-e2e"
+input_per_million = 1.0
+output_per_million = 2.0
+currency = "USD"
+source = "synthetic localhost fixture; not a commercial price"
+retrieved_at = "2026-11-19"
+
+[[adaptiveai.cloud_providers.pricing]]
+model = "fallback"
+input_per_million = 0.5
+output_per_million = 1.0
+currency = "USD"
+source = "synthetic localhost fixture; not a commercial price"
+retrieved_at = "2026-11-19"
+
+[[adaptiveai.auto_candidates]]
+candidate_id = "local-e2e-primary"
+provider = "local-e2e"
+deployment = "localhost-fixture"
+model = "local-e2e"
+capabilities = ["text", "code"]
+context_tokens = 4096
+input_per_million = 1.0
+output_per_million = 2.0
+
+[[adaptiveai.auto_candidates.evidence]]
+evidence_id = "synthetic-alpha-code-primary"
+category = "coding"
+metric = "synthetic_accuracy"
+value = 0.8
+comparability_group = "synthetic-alpha-v1"
+provenance = "synthetic Phase 7 fixture; not empirical model evidence"
+
+[[adaptiveai.auto_candidates]]
+candidate_id = "local-e2e-economy"
+provider = "local-e2e"
+deployment = "localhost-fixture"
+model = "fallback"
+capabilities = ["text"]
+context_tokens = 4096
+input_per_million = 0.5
+output_per_million = 1.0
+
+[[adaptiveai.auto_candidates.evidence]]
+evidence_id = "synthetic-alpha-code-economy"
+category = "coding"
+metric = "synthetic_accuracy"
+value = 0.6
+comparability_group = "synthetic-alpha-v1"
+provenance = "synthetic Phase 7 fixture; not empirical model evidence"

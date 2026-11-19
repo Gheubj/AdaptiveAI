@@ -108,3 +108,106 @@
   artifacts contain no raw/models/processed/vendor/reports directories.
 - Audited secrets, large files, dependencies, licenses, and publication controls. Nothing was
   published and no Phase 6 work began.
+
+## 2026-11-18 — Phase 6A model intelligence foundation
+
+- Implemented strict provider-independent identities for families, exact/unknown revisions,
+  quantization, providers, time-bounded aliases, deployments, and evaluation configurations.
+- Added content-addressed evidence with explicit missingness, provenance, reliability, permission
+  metadata, duplicate rejection, and structured comparability diagnostics.
+- Added deny-by-default redistribution decisions, versioned tri-state capability profiles, and
+  deterministic eligible/ineligible/unknown deployment checks with stable reason codes.
+- Added a synthetic fixture-only benchmark adapter and a compatibility wrapper that delegates to
+  the unchanged v0.1.0 routing engine.
+- Performed no real-source ingestion, model inference, training, network pilot, paid API call, or
+  model download. Phase 6B is documented only as a gated proposal.
+
+## 2026-11-18 — Phase 6B external evidence pilot
+
+- Audited the official Hugging Face dataset leaderboard API and SWE-bench Verified semantics.
+- Made two bounded anonymous metadata requests totaling 119,760 bytes: schema inspection and the
+  adapter pilot. No task data, outputs, trajectories, or weights were downloaded.
+- The pilot accepted 20 of 78 advertised rows, preserving original percent scores and complete
+  provenance. All 20 revisions and identities remain unresolved and all rows were unverified.
+- Stored the immutable snapshot and evidence SQLite database outside Git; permission-aware public
+  export denies every record because result redistribution is not explicitly licensed.
+- Added mocked/offline tests, opt-in live integration, conservative comparison/profile queries, and
+  CLI/example workflows. Phase 6C was not started.
+
+## 2026-11-19 — Phase 6B.5 routing data fitness
+
+- Preserved Phase 6B as local commit `6af2021` before new work.
+- Audited xRouteBench and RoutingCompendium without downloading row-level data. xRouteBench has the
+  stronger supervision schema but no declared dataset license; RoutingCompendium inherits multiple
+  unresolved source licenses.
+- Added distinct routing-supervision records, bounded adapter contracts, explicit missing matrix
+  cells, duplicate/conflict checks, deterministic sampling, leakage checks, binary Oracle and
+  pairwise analysis, historical-cost refusal, and baseline eligibility.
+- Used only synthetic fixtures for calculations. No neural router, external dataset, paid API,
+  inference, model weights, or cloud integration was used. Phase 6C was preregistered only.
+# 2026-11-19 — Phase 6G
+
+- Preserved Phase 6B.5 as local commit `5d7e650` and created `codex/phase6g`.
+- Added an offline-tested BYOK cloud gateway and OpenAI-compatible chat subset.
+- Added strict unknown-price rejection, usage/cost provenance, provider scopes, explicit selection,
+  endpoint/secret controls, and no automatic paid retries.
+- Used only deterministic mock responses. Real API spend, external inference, dataset acquisition,
+  model downloads, trained routing, and claims about quality or savings: none.
+- Prepared research-data permission drafts but did not send them.
+
+# 2026-11-19 — Phase 7 Developer Alpha
+
+- Preserved Phase 6G as local commit `40af4a1`; created `codex/phase7`.
+- Added deterministic Auto V0 and a real two-server localhost test path.
+- Synthetic task/evidence fixtures test correctness only; no empirical gain is reported.
+- Added budget reservation/release and strict-SSRF fail-closed configuration.
+- External inference, spending, downloads, training and restricted data use: none.
+
+# 2026-11-19 — Phase 7.1 external-provider readiness
+
+- Preserved Phase 7 in local commit `a13e808` and created `codex/phase7-1`.
+- Audited current official OpenRouter catalog, model page, routing, rate-limit and pricing material.
+- Selected exact `inclusionai/ling-3.2-flash:free`; excluded dynamic router IDs.
+- Added a dry-run smoke plan requiring one upstream, disabled fallback and a zero-USD dated price.
+- External inference authorization remained `NOT_AUTHORIZED`; requests and spend were zero.
+- Proposed v0.2.0a1 only; no version change, push, tag, release, PyPI upload or Phase 8 work.
+
+# 2026-11-19 — Phase 7.1 authorized live-smoke preflight
+
+- Received authorization for exactly one non-streaming OpenRouter request to the pinned free model
+  and Ant Digital upstream with an eight-token cap and USD 0 budget.
+- Refreshed public availability, pricing, upstream and routing/privacy constraint evidence.
+- The process environment did not contain `OPENROUTER_API_KEY`; mandatory authenticated account,
+  quota and privacy checks could not run.
+- Failed closed before inference: authenticated requests 0, inference requests 0, prompt transfers
+  0, retries 0 and spend USD 0.00.
+
+# 2026-11-19 — Phase 7.1 GroqCloud preparation
+
+- Preserved the OpenRouter historical live-smoke report unchanged and added a separate Groq profile.
+- Recorded Groq's published standard price instead of treating Free-tier eligibility as zero price.
+- Added support and a regression test for official provider base URLs already ending in `/v1`.
+- Public-DNS/HTTPS/allowlist endpoint preflight passed without an HTTP request; `GROQ_API_KEY` was
+  absent, so account/model/privacy checks could not run.
+- Strict zero-budget authorization cannot represent the unverified Free entitlement without
+  falsifying pricing; inference, retries, prompt transfers and spend remained zero.
+
+# 2026-11-19 — Phase 7.1 ProxyAPI preparation
+
+- Verified the current official exact model and 104/413 RUB per-million pricing including VAT.
+- Reused the provider-independent adapter and its documented `/v1` base-URL support.
+- Extended strict budgeting with Decimal arithmetic, explicit currencies and mixed-currency refusal;
+  no exchange rate or zero-price fiction was introduced.
+- Added an offline ProxyAPI contract covering request shape, usage, reservations, typed failures,
+  no retries/fallback, local-only and credential redaction.
+- `PROXYAPI_API_KEY` was absent; authenticated preflight, inference, prompt transfer and spend were
+  all zero. Status: `BLOCKED_BY_MISSING_CREDENTIALS`.
+
+# 2026-11-19 — Developer Preview 0.2.0a1 preparation
+
+- Recorded the separately authorized single ProxyAPI completion without overstating compatibility.
+- Updated package/CLI/server metadata to PEP 440 version `0.2.0a1`.
+- Added external quick starts, feature/provider matrices, limitations and release evidence.
+- Full Python 3.12 suite passed (127 passed, 3 optional skips, 71% coverage); Python 3.11 remains
+  pending CI.
+- Built and clean-installed wheel/sdist. No additional inference, publication or research phase.

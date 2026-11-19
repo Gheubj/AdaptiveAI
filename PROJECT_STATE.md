@@ -1,8 +1,36 @@
 # Project State
 
-Updated: 2026-11-18
+Updated: 2026-11-18 (Phase 6A working branch)
 
 ## Current status
+
+Phase 6B.5 is implemented locally on top of Phase 6B commit `6af2021`. Audits found xRouteBench
+technically fit for matched prompt/model routing supervision and RoutingCompendium useful for
+cross-pool study, but neither currently has a sufficiently explicit row-level permission basis for
+ingestion: xRouteBench declares no dataset license, while RoutingCompendium delegates rights to five
+source benchmarks without a consolidated matrix. No external rows were downloaded. Source-neutral
+schemas, fixture adapter, matrix/leakage/complementarity/cost analysis, and Phase 6C preregistration
+were implemented offline. Decision: **BLOCKED BY DATA RIGHTS / DATA QUALITY** pending clarification.
+Final verification passed with 98 tests, three expected skips, 68% whole-package coverage, 91–100%
+new-module coverage, clean Ruff/format, successful builds and clean-target imports. Focused tests
+used 48,548 KiB peak RSS; no external dataset bytes were ingested.
+
+Phase 6B is implemented locally on top of Phase 6A commit `6bedc34`. One bounded anonymous import
+used the official Hugging Face leaderboard API for SWE-bench Verified: 59,880 bytes, 78 source rows,
+20 accepted under the configured limit, zero malformed rows, 20 unresolved identities, 20 unknown
+revisions, and zero independently verified records. Raw/normalized records remain in ignored local
+storage because redistribution permission is unknown. No routing claim, paid API, inference, model
+download, push, tag, or release was made. Final verification passed with 90 tests, three expected
+opt-in skips, 65% whole-package coverage, clean Ruff/format, successful package builds, clean archive
+inspection, and clean-target CLI/module imports.
+
+Phase 6A is implemented on the unpublished `codex/phase6a` branch as an additive model-intelligence
+foundation. It adds exact identity and revision semantics, typed evidence/provenance, permission
+gates, comparability diagnostics, versioned capability profiles, deterministic eligibility, a
+fixture-backed benchmark adapter, and a v0.1.0 compatibility adapter. It used no real external
+source, paid API, model download, training, or benchmark run. Phase 6B remains proposal-only and no
+release action is authorized. Final verification passed with 82 tests, two optional integration
+skips, clean Ruff/format checks, 60% whole-package coverage, and clean wheel/sdist inspection.
 
 Phase 2 is complete for reproducible routing baselines on the frozen Phase 1B data. The official
 LLMRouterBench archive is stored outside Git with SHA-256
@@ -20,6 +48,23 @@ baselines, license audit, and Phase 1B documentation are available. No paid API 
 was used.
 
 ## Known limitations
+
+- Phase 6B.5 contains no new external matched outcomes; public dataset-card counts are audit metadata,
+  not locally validated empirical results.
+- Exact/near-duplicate leakage beyond normalized text hashes requires a permission-cleared snapshot.
+- Historical routing identities cannot be promoted to live deployments without revision mapping and
+  targeted current calibration.
+
+- Phase 6B evidence describes agent/model systems, not isolated base-model quality; exact revisions
+  and scaffolds are unknown for every pilot row.
+- All accepted live rows were source-declared (`verified=false`) and redistribution remains denied.
+- The bounded 20-row pilot is deliberately incomplete and cannot support universal ranking or
+  prompt-aware routing validation.
+
+- Phase 6A contains no admitted real provider or benchmark source; its adapter is fixture-only.
+- Provider aliases, availability, pricing, and capabilities are time-varying and require explicit
+  source-specific freshness policy in a later phase.
+- The eligibility layer is a deterministic safety gate, not a quality rank or inference guarantee.
 
 - 10,881 repeated query/model pairs arise from overlapping upstream releases; 237 scores conflict.
 - 4,327 scores are missing non-randomly, primarily one SimpleQA/model panel.
@@ -128,3 +173,58 @@ Release-gate verification: 75 tests passed, one optional archive integration ski
 whole-package statement coverage, real local CLI/API streaming smoke passed, isolated wheel
 `pip check` passed, and release archives contain no raw datasets, weights, processed caches, vendor
 tree, or reports. The earlier 75% figure was phase-scoped.
+# Phase 6G development status (2026-11-19)
+
+Phase 6G implements an opt-in, provider-independent BYOK gateway on branch `codex/phase6g`.
+The OpenAI-compatible adapter, endpoint validation, provider scopes, streaming, typed errors,
+usage/cost records, strict budgets, CLI/SDK surfaces, and offline mock integration are implemented.
+No real cloud inference, paid request, model download, or research dataset download was performed.
+Quality for newly configured cloud models remains unknown; no routing superiority or saving is
+claimed. Phase 6B.5 remains frozen in local commit `5d7e650`.
+
+# Phase 7 Developer Alpha status (2026-11-19)
+
+Phase 6G is preserved in local commit `40af4a1`. Phase 7 adds a real localhost provider E2E path,
+explainable deterministic Auto V0, Economy/Manual modes, task-understanding abstention,
+eligibility-first selection, strict comparable-evidence rules, dry-run explanations, atomic budget
+reservations and a zero-cost cloud-only quick start. Examples use explicitly synthetic evidence.
+External providers remain unvalidated and no routing superiority claim is made.
+
+# Phase 7.1 status (2026-11-19)
+
+Phase 7 is preserved in local commit `a13e808`. Phase 7.1 prepares an exact, zero-price OpenRouter
+candidate with one pinned upstream, provider fallback disabled, and a non-network fail-closed smoke
+preflight. No external inference was authorized or executed; spend is USD 0. Status is
+`READY_FOR_OWNER_AUTHORIZATION`. Current version remains 0.1.0; v0.2.0a1 is only a developer-preview
+proposal. Phase 8 was not started.
+
+The owner subsequently authorized one exact OpenRouter smoke request, but the mandatory preflight
+failed closed because `OPENROUTER_API_KEY` was not present in the task process environment. No
+authenticated request or inference was sent, the prompt was not disclosed, and cost remained USD
+0.00. External validation therefore remains incomplete.
+
+# Phase 7.1 Groq preparation status (2026-11-19)
+
+OpenRouter historical evidence remains unchanged. A separate GroqCloud profile targets the official
+`/openai/v1` API and exact `openai/gpt-oss-20b` model. No key was present and no authenticated or
+inference request was made. Standard published pricing is truthfully recorded as USD 0.075/M input
+and USD 0.30/M output; the current strict price-based gateway cannot independently represent a
+Free-tier entitlement under an authorized USD 0 budget. Status: `BLOCKED_BY_BUDGET` (with account
+preflight also blocked until `GROQ_API_KEY` is inherited by the process).
+
+# Phase 7.1 ProxyAPI preparation status (2026-11-19)
+
+A minimal ProxyAPI profile reuses the existing gateway at the current `/v1` endpoint and exact
+`openai/gpt-4.1-mini` identifier. RUB pricing is represented with exact Decimal arithmetic and
+explicit request/ledger currency; mixed currencies are rejected without FX conversion. Official
+104/413 RUB per-million prices were refreshed. Offline provider, error, budget and URL-contract
+tests pass. `PROXYAPI_API_KEY` is absent, so authenticated preflight and inference were not attempted;
+status is `BLOCKED_BY_MISSING_CREDENTIALS`. Earlier provider reports remain historical and unchanged.
+
+# Developer Preview 0.2.0a1 release candidate (2026-11-19)
+
+The owner authorized and consumed exactly one ProxyAPI basic completion: response `ok`, measured
+latency 0.7832 seconds, no retry/fallback, and 0.001661 RUB confirmed by the provider-key budget.
+This validates only basic non-streaming completion. Version 0.2.0a1 now packages Phases 6A–7.1 for
+external review. Local Python 3.12 verification passed; Python 3.11 remains pending CI. No push, tag,
+release, PyPI upload or new research phase has been authorized.

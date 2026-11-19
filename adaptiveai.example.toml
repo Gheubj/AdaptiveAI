@@ -13,3 +13,13 @@ switch_hysteresis_seconds = 0.5
 balanced_latency_weight = 0.15
 log_level = "INFO"
 research_logging = false
+
+# Cloud BYOK is opt-in. Keep local_only=true unless you intend to permit cloud requests.
+# [[adaptiveai.cloud_providers]]
+# provider_id = "my-provider"
+# deployment_id = "production-us"
+# base_url = "https://api.provider.example"
+# api_key_env = "MY_PROVIDER_API_KEY"
+# permitted_models = ["deployment-a"]
+# allowed_hosts = ["api.provider.example"]
+# hosted_mode = true

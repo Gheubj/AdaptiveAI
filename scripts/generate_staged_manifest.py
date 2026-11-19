@@ -52,7 +52,16 @@ def main() -> None:
             }
         )
     output = Path("docs/STAGED_FILE_MANIFEST.json")
-    output.write_text(json.dumps({"files": rows}, indent=2) + "\n")
+    # The manifest includes itself. Iterate until the serialized self-size reaches a fixed point.
+    for _ in range(10):
+        output.write_text(json.dumps({"files": rows}, indent=2) + "\n")
+        size = output.stat().st_size
+        self_row = next(row for row in rows if row["path"] == str(output))
+        if self_row["size_bytes"] == size:
+            break
+        self_row["size_bytes"] = size
+    else:
+        raise RuntimeError("manifest self-size did not stabilize")
 
 
 if __name__ == "__main__":

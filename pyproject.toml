@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "adaptiveai"
-version = "0.1.0"
+version = "0.2.0a1"
 description = "Hardware-aware, quality-constrained LLM routing research infrastructure"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -42,8 +42,11 @@ exclude = [
   "/data/models/**",
   "/data/processed/**",
   "/data/catalog/**",
+  "/data/external_cache/**",
+  "/data/evidence/**",
   "/vendor/**",
   "/reports/**",
+  "/planning/**",
   "/dist/**",
   "/.venv/**",
   "/.coverage",
@@ -55,6 +58,7 @@ testpaths = ["tests"]
 markers = [
   "real_data: optional integration test requiring ADAPTIVEAI_REAL_ARCHIVE",
   "real_local: optional llama.cpp smoke test requiring ADAPTIVEAI_REAL_LOCAL=1",
+  "live_hf: optional bounded Hugging Face metadata test requiring ADAPTIVEAI_LIVE_HF=1",
 ]
 
 [tool.ruff]

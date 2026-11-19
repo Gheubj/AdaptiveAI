@@ -11,6 +11,8 @@ data/interim/*
 data/processed/*
 !data/processed/.gitkeep
 data/catalog/
+data/external_cache/
+data/evidence/
 data/models/
 vendor/
 reports/

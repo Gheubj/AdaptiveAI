@@ -1,1130 +1,164 @@
 {
   "files": [
     {
-      "path": ".github/workflows/ci.yml",
-      "size_bytes": 546,
+      "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
+      "size_bytes": 635,
       "file_type": "application/yaml",
       "purpose": "Continuous integration",
       "publication_suitability": "include"
     },
     {
-      "path": ".gitignore",
-      "size_bytes": 321,
-      "file_type": "text/plain",
-      "purpose": "Project, packaging, license, or release metadata",
+      "path": ".github/ISSUE_TEMPLATE/feature_request.yml",
+      "size_bytes": 524,
+      "file_type": "application/yaml",
+      "purpose": "Continuous integration",
       "publication_suitability": "include"
     },
     {
       "path": "CHANGELOG.md",
-      "size_bytes": 394,
+      "size_bytes": 1422,
       "file_type": "text/markdown",
       "purpose": "Project, packaging, license, or release metadata",
       "publication_suitability": "include"
     },
     {
       "path": "CITATION.cff",
-      "size_bytes": 250,
-      "file_type": "text/plain",
-      "purpose": "Project, packaging, license, or release metadata",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "LICENSE",
-      "size_bytes": 11358,
+      "size_bytes": 252,
       "file_type": "text/plain",
       "purpose": "Project, packaging, license, or release metadata",
       "publication_suitability": "include"
     },
     {
       "path": "PROJECT_STATE.md",
-      "size_bytes": 8023,
+      "size_bytes": 15214,
       "file_type": "text/markdown",
       "purpose": "Project, packaging, license, or release metadata",
       "publication_suitability": "include"
     },
     {
       "path": "README.md",
-      "size_bytes": 4180,
+      "size_bytes": 6581,
       "file_type": "text/markdown",
       "purpose": "Project, packaging, license, or release metadata",
       "publication_suitability": "include"
     },
     {
-      "path": "THIRD_PARTY_NOTICES.md",
-      "size_bytes": 1989,
+      "path": "SECURITY.md",
+      "size_bytes": 777,
       "file_type": "text/markdown",
       "purpose": "Project, packaging, license, or release metadata",
       "publication_suitability": "include"
     },
     {
-      "path": "adaptiveai.example.toml",
-      "size_bytes": 412,
-      "file_type": "text/plain",
-      "purpose": "Project, packaging, license, or release metadata",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "data/interim/.gitkeep",
-      "size_bytes": 1,
-      "file_type": "text/plain",
-      "purpose": "Small model registry/profile metadata; no weights",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "data/local_model_profiles.json",
-      "size_bytes": 492,
-      "file_type": "application/json",
-      "purpose": "Small model registry/profile metadata; no weights",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "data/local_model_registry.json",
-      "size_bytes": 922,
-      "file_type": "application/json",
-      "purpose": "Small model registry/profile metadata; no weights",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "data/processed/.gitkeep",
-      "size_bytes": 1,
-      "file_type": "text/plain",
-      "purpose": "Small model registry/profile metadata; no weights",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "data/raw/.gitkeep",
-      "size_bytes": 1,
-      "file_type": "text/plain",
-      "purpose": "Small model registry/profile metadata; no weights",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/ABLATION_STUDIES.md",
-      "size_bytes": 978,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/API_REFERENCE.md",
-      "size_bytes": 946,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/ARCHITECTURE.md",
-      "size_bytes": 638,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/BASELINE_METHODS.md",
-      "size_bytes": 1147,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/CALIBRATION_ANALYSIS.md",
-      "size_bytes": 960,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/COMPUTE_BUDGET_COMPARISON.md",
-      "size_bytes": 731,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/CONFIGURATION.md",
-      "size_bytes": 586,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/CONFIRMATORY_EVALUATION_PLAN.md",
-      "size_bytes": 1167,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/CONSTRAINED_GATING_ANALYSIS.md",
-      "size_bytes": 1038,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/CONTRIBUTING.md",
-      "size_bytes": 462,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/CROSS_DATASET_GENERALIZATION.md",
-      "size_bytes": 684,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/DATA_QUALITY_REPORT.md",
-      "size_bytes": 1704,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/DATA_SOURCES.md",
-      "size_bytes": 1722,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/DECISIONS.md",
-      "size_bytes": 6981,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/END_TO_END_EVALUATION.md",
-      "size_bytes": 1256,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/ERROR_ANALYSIS.md",
-      "size_bytes": 1110,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/EVALUATION_RESOLUTION_POLICY.md",
-      "size_bytes": 1615,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/EXPERIMENTAL_PROTOCOL.md",
-      "size_bytes": 1677,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/FINAL_ROUTING_COMPARISON.md",
-      "size_bytes": 2135,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/HARDWARE_ABLATIONS.md",
-      "size_bytes": 1180,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/HARDWARE_AWARE_ROUTING.md",
-      "size_bytes": 967,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/HARDWARE_PROFILING_PROTOCOL.md",
-      "size_bytes": 956,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/HARDWARE_ROUTING_COMPARISON.md",
-      "size_bytes": 1841,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/HYBRID_ARCHITECTURE.md",
-      "size_bytes": 783,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/INDEPENDENT_BENCHMARK_AUDIT.md",
-      "size_bytes": 3222,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/INSTALLATION.md",
-      "size_bytes": 666,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/LICENSE_AUDIT.md",
-      "size_bytes": 3384,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/LIMITATIONS.md",
-      "size_bytes": 688,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/LOCAL_BENCHMARK_V2.md",
-      "size_bytes": 1278,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/LOCAL_MODEL_REGISTRY.md",
-      "size_bytes": 793,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/LOCAL_QUALITY_BENCHMARK.md",
-      "size_bytes": 1047,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/MATCHED_BUDGET_RESULTS.md",
-      "size_bytes": 2030,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/METHODOLOGY.md",
-      "size_bytes": 5135,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/MODEL_COMPLEMENTARITY.md",
-      "size_bytes": 1121,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/MODEL_LIFECYCLE.md",
-      "size_bytes": 642,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/NEURAL_ARCHITECTURES.md",
-      "size_bytes": 2115,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/NEURAL_ROUTING_RESULTS.md",
-      "size_bytes": 1233,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/OOD_GENERALIZATION.md",
-      "size_bytes": 1083,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/OPEN_QUESTIONS.md",
-      "size_bytes": 1000,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/OPEN_SOURCE_AUDIT.md",
-      "size_bytes": 2097,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/OWNER_RELEASE_APPROVAL.md",
-      "size_bytes": 4953,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PAPER_DATASET_RECONCILIATION.md",
-      "size_bytes": 1732,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PAPER_NOTES.md",
-      "size_bytes": 5160,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE1B_REPORT.md",
-      "size_bytes": 2005,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE1_REPORT.md",
-      "size_bytes": 1935,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE2_REPORT.md",
-      "size_bytes": 2907,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE3_5_REPORT.md",
-      "size_bytes": 4523,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE3_6_PREREGISTRATION.md",
-      "size_bytes": 4307,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE3_6_REPORT.md",
-      "size_bytes": 2268,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE3_REPORT.md",
-      "size_bytes": 2631,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE3_RESEARCH_DESIGN.md",
-      "size_bytes": 1453,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE4_5_EXPERIMENTAL_PROTOCOL.md",
-      "size_bytes": 5682,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE4_5_REPORT.md",
-      "size_bytes": 3271,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE4_EXECUTION_PLAN.md",
-      "size_bytes": 2978,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE4_REPORT.md",
-      "size_bytes": 1864,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE4_RESEARCH_DESIGN.md",
-      "size_bytes": 1013,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE5_EXECUTION_PLAN.md",
-      "size_bytes": 1079,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE5_PRODUCT_PLAN.md",
-      "size_bytes": 933,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE5_REPORT.md",
-      "size_bytes": 1635,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PHASE6_RESEARCH_AND_PRODUCT_ROADMAP.md",
-      "size_bytes": 784,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/PRIVACY_AND_SECURITY.md",
-      "size_bytes": 651,
+      "path": "docs/DEVELOPER_PREVIEW_FEATURE_MATRIX.md",
+      "size_bytes": 1481,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/PRODUCT_ARCHITECTURE.md",
-      "size_bytes": 775,
+      "path": "docs/DEVELOPER_PREVIEW_KNOWN_LIMITATIONS.md",
+      "size_bytes": 1260,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/PRODUCT_READINESS_AUDIT.md",
-      "size_bytes": 1770,
+      "path": "docs/DEVELOPER_PREVIEW_QUICKSTART.md",
+      "size_bytes": 2972,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/QUALITY_LATENCY_PARETO.md",
-      "size_bytes": 1195,
+      "path": "docs/DEVELOPER_PREVIEW_RELEASE_CHECKLIST.md",
+      "size_bytes": 1086,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/QUICKSTART.md",
-      "size_bytes": 588,
+      "path": "docs/DEVELOPER_PREVIEW_RELEASE_REPORT.md",
+      "size_bytes": 1434,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/REAL_DATA_SCHEMA_AUDIT.md",
-      "size_bytes": 1562,
+      "path": "docs/DEVELOPER_PREVIEW_TEST_RESULTS.md",
+      "size_bytes": 899,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/RELEASE_CHECKLIST.md",
-      "size_bytes": 1863,
+      "path": "docs/PHASE7_1_PROXYAPI_SMOKE_REPORT.md",
+      "size_bytes": 10461,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/RELEASE_READINESS.md",
-      "size_bytes": 2008,
+      "path": "docs/PROVIDER_COMPATIBILITY_MATRIX.md",
+      "size_bytes": 1054,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
       "path": "docs/RESEARCH_LOG.md",
-      "size_bytes": 7192,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/RESEARCH_RESULTS.md",
-      "size_bytes": 766,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/RESULTS_REGISTRY.md",
-      "size_bytes": 4541,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/ROBUST_FALLBACK_ANALYSIS.md",
-      "size_bytes": 684,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/ROUTING_FEASIBILITY.md",
-      "size_bytes": 1475,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/ROUTING_MODES.md",
-      "size_bytes": 618,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/ROUTING_RESEARCH_CONCLUSIONS.md",
-      "size_bytes": 1400,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/SCORING_VALIDATION.md",
-      "size_bytes": 1055,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/SEMANTIC_ENCODER_COMPARISON.md",
-      "size_bytes": 893,
+      "size_bytes": 13863,
       "file_type": "text/markdown",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
       "path": "docs/STAGED_FILE_MANIFEST.json",
-      "size_bytes": 34335,
+      "size_bytes": 5083,
       "file_type": "application/json",
       "purpose": "Public documentation or release audit",
       "publication_suitability": "include"
     },
     {
-      "path": "docs/STATISTICAL_ANALYSIS.md",
-      "size_bytes": 818,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/THREATS_TO_VALIDITY.md",
-      "size_bytes": 5919,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "docs/TRAINING_PROTOCOL.md",
-      "size_bytes": 1369,
-      "file_type": "text/markdown",
-      "purpose": "Public documentation or release audit",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "examples/basic_chat.py",
-      "size_bytes": 236,
+      "path": "examples/openai_sdk_local.py",
+      "size_bytes": 464,
       "file_type": "text/x-python",
       "purpose": "Developer example",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "examples/hardware_diagnostics.sh",
-      "size_bytes": 87,
-      "file_type": "text/x-sh",
-      "purpose": "Developer example",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "examples/routing_modes.py",
-      "size_bytes": 284,
-      "file_type": "text/x-python",
-      "purpose": "Developer example",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "examples/streaming.py",
-      "size_bytes": 297,
-      "file_type": "text/x-python",
-      "purpose": "Developer example",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "experiments/runs.jsonl",
-      "size_bytes": 19506,
-      "file_type": "text/plain",
-      "purpose": "Aggregate experiment provenance; no row-level dataset",
       "publication_suitability": "include"
     },
     {
       "path": "pyproject.toml",
-      "size_bytes": 1422,
+      "size_bytes": 1583,
       "file_type": "text/plain",
       "purpose": "Project, packaging, license, or release metadata",
       "publication_suitability": "include"
     },
     {
-      "path": "references/references.bib",
-      "size_bytes": 3047,
-      "file_type": "text/x-bibtex",
-      "purpose": "Bibliography metadata",
-      "publication_suitability": "include"
-    },
-    {
       "path": "scripts/generate_staged_manifest.py",
-      "size_bytes": 1904,
+      "size_bytes": 2318,
       "file_type": "text/x-python",
       "purpose": "Release/audit utility",
       "publication_suitability": "include"
     },
     {
       "path": "src/adaptiveai/__init__.py",
-      "size_bytes": 66,
+      "size_bytes": 68,
       "file_type": "text/x-python",
       "purpose": "Python package source",
       "publication_suitability": "include"
     },
     {
       "path": "src/adaptiveai/api.py",
-      "size_bytes": 9164,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/audit.py",
-      "size_bytes": 6348,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/benchmark.py",
-      "size_bytes": 12229,
+      "size_bytes": 15250,
       "file_type": "text/x-python",
       "purpose": "Python package source",
       "publication_suitability": "include"
     },
     {
       "path": "src/adaptiveai/cli.py",
-      "size_bytes": 15748,
+      "size_bytes": 30515,
       "file_type": "text/x-python",
       "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/client.py",
-      "size_bytes": 1704,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/config.py",
-      "size_bytes": 2836,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/eda.py",
-      "size_bytes": 7604,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/experiments.py",
-      "size_bytes": 2248,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/feasibility.py",
-      "size_bytes": 4148,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/hardware.py",
-      "size_bytes": 3053,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/hardware_routing.py",
-      "size_bytes": 3368,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/io.py",
-      "size_bytes": 6323,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/lifecycle.py",
-      "size_bytes": 9054,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/local_api.py",
-      "size_bytes": 3833,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/local_backend.py",
-      "size_bytes": 13504,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/neural.py",
-      "size_bytes": 13784,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/neural_experiments.py",
-      "size_bytes": 9577,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/normalize.py",
-      "size_bytes": 10511,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/phase2_analysis.py",
-      "size_bytes": 5600,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/phase36_audit.py",
-      "size_bytes": 8290,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/phase36_compute.py",
-      "size_bytes": 7643,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/phase45_analysis.py",
-      "size_bytes": 10101,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/phase45_benchmark.py",
-      "size_bytes": 13597,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/phase45_e2e.py",
-      "size_bytes": 3599,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/phase4_experiments.py",
-      "size_bytes": 11835,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/product_registry.py",
-      "size_bytes": 1774,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/protocol.py",
-      "size_bytes": 2153,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/providers.py",
-      "size_bytes": 1087,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/public.py",
-      "size_bytes": 1646,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/registry.py",
-      "size_bytes": 4288,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/resolution.py",
-      "size_bytes": 2415,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/routers.py",
-      "size_bytes": 6339,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/routing_engine.py",
-      "size_bytes": 6096,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/schemas.py",
-      "size_bytes": 1732,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/semantic.py",
-      "size_bytes": 9735,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/semantic_experiments.py",
-      "size_bytes": 15456,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/splits.py",
-      "size_bytes": 5730,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/statistics.py",
-      "size_bytes": 2106,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "src/adaptiveai/validation.py",
-      "size_bytes": 2779,
-      "file_type": "text/x-python",
-      "purpose": "Python package source",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/conftest.py",
-      "size_bytes": 2054,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_audit.py",
-      "size_bytes": 1114,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_eda.py",
-      "size_bytes": 602,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_experiments.py",
-      "size_bytes": 784,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_feasibility.py",
-      "size_bytes": 1149,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_hardware.py",
-      "size_bytes": 6557,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_io.py",
-      "size_bytes": 2920,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_neural.py",
-      "size_bytes": 2273,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_normalize.py",
-      "size_bytes": 1280,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_phase2.py",
-      "size_bytes": 5490,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_phase45.py",
-      "size_bytes": 1490,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_product.py",
-      "size_bytes": 8241,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_product_real.py",
-      "size_bytes": 1337,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_real_integration.py",
-      "size_bytes": 815,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_registry.py",
-      "size_bytes": 1690,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_semantic.py",
-      "size_bytes": 3460,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_splits.py",
-      "size_bytes": 2537,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
-      "publication_suitability": "include"
-    },
-    {
-      "path": "tests/test_validation.py",
-      "size_bytes": 1141,
-      "file_type": "text/x-python",
-      "purpose": "Automated test",
       "publication_suitability": "include"
     }
   ]

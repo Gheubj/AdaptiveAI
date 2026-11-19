@@ -2,7 +2,7 @@ cff-version: 1.2.0
 title: AdaptiveAI
 message: "If you use this experimental software, cite this repository and the exact release."
 type: software
-version: 0.1.0
+version: 0.2.0a1
 date-released: 2026-11-18
 license: Apache-2.0
 authors:
