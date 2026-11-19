@@ -4,6 +4,7 @@ import ipaddress
 import json
 import os
 import socket
+import threading
 import time
 import uuid
 from collections import deque
@@ -99,6 +100,7 @@ class CloudProviderConfig(BaseModel):
     max_response_bytes: int = Field(2_097_152, ge=1024, le=67_108_864)
     max_requests_per_minute: int | None = Field(None, ge=1)
     hosted_mode: bool = True
+    strict_ssrf_protection: bool = False
     allow_localhost: bool = False
     allowed_hosts: tuple[str, ...] = ()
     request_parameters: dict[str, Any] = Field(default_factory=dict)
@@ -136,6 +138,10 @@ def validate_endpoint(
     resolver: Callable[..., list[tuple[Any, ...]]] = socket.getaddrinfo,
 ) -> None:
     parsed = urlparse(config.base_url)
+    if config.strict_ssrf_protection:
+        raise ValueError(
+            "strict SSRF protection requires a connection-pinned transport or egress firewall"
+        )
     if parsed.username or parsed.password or parsed.query or parsed.fragment:
         raise ValueError("provider base_url cannot contain credentials, query, or fragment")
     if not parsed.hostname or parsed.scheme not in {"http", "https"}:
@@ -227,20 +233,37 @@ class UsageRecord:
 class BudgetLedger:
     max_total: float | None = None
     committed: float = 0.0
+    reserved: float = 0.0
     records: list[UsageRecord] = field(default_factory=list)
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     def authorize(self, estimate: CostEstimate, per_request: float | None) -> None:
-        if per_request is not None and estimate.amount > per_request:
-            raise BudgetError("estimated request cost exceeds the configured request budget")
-        if self.max_total is not None and self.committed + estimate.amount > self.max_total:
-            raise BudgetError("estimated request cost exceeds the configured total budget")
+        with self._lock:
+            if per_request is not None and estimate.amount > per_request:
+                raise BudgetError("estimated request cost exceeds the configured request budget")
+            if (
+                self.max_total is not None
+                and self.committed + self.reserved + estimate.amount > self.max_total
+            ):
+                raise BudgetError("estimated request cost exceeds the configured total budget")
+            self.reserved += estimate.amount
+
+    def release(self, amount: float | None) -> None:
+        if amount is None:
+            return
+        with self._lock:
+            self.reserved = max(0.0, self.reserved - amount)
 
     def record(self, record: UsageRecord) -> None:
-        self.records.append(record)
-        if record.actual_cost is not None:
-            self.committed += record.actual_cost
-        elif record.estimated_cost is not None:
-            self.committed += record.estimated_cost
+        with self._lock:
+            if record.estimated_cost is not None:
+                self.reserved = max(0.0, self.reserved - record.estimated_cost)
+            self.records.append(record)
+            if record.status == "succeeded":
+                if record.actual_cost is not None:
+                    self.committed += record.actual_cost
+                elif record.estimated_cost is not None:
+                    self.committed += record.estimated_cost
 
 
 class CloudProvider(Protocol):

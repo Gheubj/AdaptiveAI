@@ -10,6 +10,9 @@ class RoutingMode(StrEnum):
     QUALITY = "quality"
     BALANCED = "balanced"
     HARDWARE_AWARE = "hardware-aware"
+    AUTO = "auto"
+    ECONOMY = "economy"
+    MANUAL = "manual"
 
 
 class ProviderScope(StrEnum):
@@ -43,6 +46,8 @@ class InferenceRequest:
     max_total_cost: float | None = None
     strict_budget: bool = True
     fallback_models: tuple[str, ...] = ()
+    required_capabilities: frozenset[str] = frozenset({"text"})
+    minimum_context_tokens: int | None = None
 
 
 @dataclass(frozen=True)
@@ -62,6 +67,7 @@ class RoutingDiagnostics:
     estimated_cost: float | None = None
     actual_cost: float | None = None
     usage_source: str | None = None
+    explanation: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)

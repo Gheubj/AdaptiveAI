@@ -32,3 +32,7 @@ prevents any cloud invocation. The gateway resolves one allowlisted provider and
 worst-case price check, and invokes the provider adapter without automatic paid retries. The first
 adapter implements a bounded OpenAI chat-completions subset. Secrets remain environment references.
 See `CLOUD_PROVIDER_ARCHITECTURE.md`.
+
+Phase 7 adds `AutoRoutingPolicy` as a replaceable pre-execution policy. It returns a resolved
+`InferenceRequest` plus a structured explanation; local/cloud executors remain unchanged. Hard
+eligibility precedes evidence ranking, and insufficient compatible evidence is a first-class result.

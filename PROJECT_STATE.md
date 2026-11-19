@@ -181,3 +181,11 @@ usage/cost records, strict budgets, CLI/SDK surfaces, and offline mock integrati
 No real cloud inference, paid request, model download, or research dataset download was performed.
 Quality for newly configured cloud models remains unknown; no routing superiority or saving is
 claimed. Phase 6B.5 remains frozen in local commit `5d7e650`.
+
+# Phase 7 Developer Alpha status (2026-11-19)
+
+Phase 6G is preserved in local commit `40af4a1`. Phase 7 adds a real localhost provider E2E path,
+explainable deterministic Auto V0, Economy/Manual modes, task-understanding abstention,
+eligibility-first selection, strict comparable-evidence rules, dry-run explanations, atomic budget
+reservations and a zero-cost cloud-only quick start. Examples use explicitly synthetic evidence.
+External providers remain unvalidated and no routing superiority claim is made.

@@ -11,3 +11,7 @@ applicable license. Live provider evaluation additionally requires owner-approve
 budget. Hyperparameters must use train/validation only; final test and ARC-AGI remain excluded from
 selection. Baselines must include best single, deterministic constrained selection, and Phase 2/3
 controls. Report uncertainty, calibration, quality, cost, latency, failures, and compute.
+
+Phase 7 Auto V0 is now the deterministic correctness baseline. V2 requires licensed matched
+outcomes, preregistered splits and demonstrated complementarity. Compare against Auto V0, Economy,
+task rules, category evidence and fixed baselines. Never train from synthetic Phase 7 fixtures.

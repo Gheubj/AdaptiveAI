@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 import threading
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
+from adaptiveai.auto_routing import AutoRoutingPolicy, InsufficientEvidenceError
 from adaptiveai.cloud import ProviderError
 from adaptiveai.cloud_gateway import CloudGateway
 from adaptiveai.config import ProductConfig
@@ -42,6 +43,8 @@ class ChatPayload(BaseModel):
     max_total_cost: float | None = Field(None, ge=0)
     strict_budget: bool = True
     fallback_models: tuple[str, ...] = ()
+    required_capabilities: frozenset[str] = frozenset({"text"})
+    minimum_context_tokens: int | None = Field(None, ge=1)
 
     @field_validator("model")
     @classmethod
@@ -53,12 +56,14 @@ class ProductService:
     def __init__(
         self,
         manager: ModelManager,
-        registry: ModelRegistry,
+        registry: ModelRegistry | None,
         config: ProductConfig,
         cloud_gateway: CloudGateway | None = None,
+        auto_router: AutoRoutingPolicy | None = None,
     ):
         self.manager, self.registry, self.config = manager, registry, config
         self.cloud_gateway = cloud_gateway
+        self.auto_router = auto_router
 
     def health(self) -> dict[str, object]:
         return {
@@ -70,17 +75,18 @@ class ProductService:
 
     def models(self) -> dict[str, object]:
         data = []
-        for status in self.registry.inspect():
-            data.append(
-                {
-                    "id": status.model.model_id,
-                    "object": "model",
-                    "owned_by": "local",
-                    "available": status.available,
-                    "family": status.model.family,
-                    "quantization": status.model.quantization,
-                }
-            )
+        if self.registry:
+            for status in self.registry.inspect():
+                data.append(
+                    {
+                        "id": status.model.model_id,
+                        "object": "model",
+                        "owned_by": "local",
+                        "available": status.available,
+                        "family": status.model.family,
+                        "quantization": status.model.quantization,
+                    }
+                )
         if self.cloud_gateway:
             for provider in self.cloud_gateway.diagnostics():
                 for model in provider["configured_models"]:
@@ -130,16 +136,46 @@ class ProductService:
             max_total_cost=payload.max_total_cost,
             strict_budget=payload.strict_budget,
             fallback_models=payload.fallback_models,
+            required_capabilities=payload.required_capabilities,
+            minimum_context_tokens=payload.minimum_context_tokens,
         )
+
+    def resolve(self, request: InferenceRequest):
+        if request.routing_mode in {RoutingMode.AUTO, RoutingMode.ECONOMY, RoutingMode.MANUAL}:
+            if self.auto_router is None:
+                raise ValueError("automatic routing is not configured")
+            return self.auto_router.select(request)
+        return None
+
+    def explain(self, payload: ChatPayload) -> dict[str, object]:
+        request = self.request(payload)
+        if request.routing_mode not in {RoutingMode.AUTO, RoutingMode.ECONOMY, RoutingMode.MANUAL}:
+            raise ValueError("route explanation requires auto, economy, or manual mode")
+        if self.auto_router is None:
+            raise ValueError("automatic routing is not configured")
+        return self.auto_router.explain(request).model_dump(mode="json")
 
     def complete(self, payload: ChatPayload) -> dict[str, object]:
         request = self.request(payload)
+        selection = self.resolve(request)
+        if selection:
+            request = selection.request
         if self._use_cloud(request):
             if self.cloud_gateway is None:
                 raise ValueError("no cloud provider gateway is configured")
             result = self.cloud_gateway.complete(request)
         else:
             result = self.manager.complete(request)
+        if selection:
+            result = replace(
+                result,
+                diagnostics=replace(
+                    result.diagnostics,
+                    mode=selection.decision.mode,
+                    reason=selection.decision.selection_reason,
+                    explanation=selection.decision.model_dump(mode="json"),
+                ),
+            )
         return {
             "id": result.request_id,
             "object": "chat.completion",
@@ -192,7 +228,7 @@ def make_handler(service: ProductService, config: ProductConfig):
                 self._error(404, "not_found", "endpoint not found")
 
         def do_POST(self) -> None:
-            if self.path != "/v1/chat/completions":
+            if self.path not in {"/v1/chat/completions", "/v1/route/explain"}:
                 self._error(404, "not_found", "endpoint not found")
                 return
             try:
@@ -209,12 +245,22 @@ def make_handler(service: ProductService, config: ProductConfig):
             try:
                 raw = self.rfile.read(length)
                 payload = ChatPayload.model_validate_json(raw)
-                if payload.stream:
+                if self.path == "/v1/route/explain":
+                    self._json(200, service.explain(payload))
+                elif payload.stream:
                     self._stream(payload)
                 else:
                     self._json(200, service.complete(payload))
             except ValidationError as error:
                 self._error(400, "invalid_request", str(error))
+            except InsufficientEvidenceError as error:
+                self._json(
+                    422,
+                    {
+                        "error": {"type": "INSUFFICIENT_EVIDENCE", "message": str(error)},
+                        "routing": error.decision.model_dump(mode="json"),
+                    },
+                )
             except ValueError as error:
                 self._error(400, "routing_error", str(error))
             except BackendError as error:
@@ -239,6 +285,9 @@ def make_handler(service: ProductService, config: ProductConfig):
             self.send_header("Connection", "close")
             self.end_headers()
             request = service.request(payload)
+            selection = service.resolve(request)
+            if selection:
+                request = selection.request
             if service._use_cloud(request):
                 if service.cloud_gateway is None:
                     raise ValueError("no cloud provider gateway is configured")
@@ -264,6 +313,13 @@ def make_handler(service: ProductService, config: ProductConfig):
                         body = {"id": event["request_id"], "usage": event["usage"]}
                     else:
                         diagnostics = event["diagnostics"]
+                        if selection:
+                            diagnostics = replace(
+                                diagnostics,
+                                mode=selection.decision.mode,
+                                reason=selection.decision.selection_reason,
+                                explanation=selection.decision.model_dump(mode="json"),
+                            )
                         body = {
                             "id": event["request_id"],
                             "object": "chat.completion.chunk",

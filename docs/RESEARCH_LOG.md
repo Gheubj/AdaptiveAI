@@ -154,3 +154,11 @@
 - Used only deterministic mock responses. Real API spend, external inference, dataset acquisition,
   model downloads, trained routing, and claims about quality or savings: none.
 - Prepared research-data permission drafts but did not send them.
+
+# 2026-11-19 — Phase 7 Developer Alpha
+
+- Preserved Phase 6G as local commit `40af4a1`; created `codex/phase7`.
+- Added deterministic Auto V0 and a real two-server localhost test path.
+- Synthetic task/evidence fixtures test correctness only; no empirical gain is reported.
+- Added budget reservation/release and strict-SSRF fail-closed configuration.
+- External inference, spending, downloads, training and restricted data use: none.

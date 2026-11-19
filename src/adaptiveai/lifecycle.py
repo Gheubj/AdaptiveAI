@@ -225,3 +225,20 @@ class ModelManager:
                 self._server.stop()
             self._server = None
             self.current_model = None
+
+
+class CloudOnlyManager:
+    """Explicit no-local-backend state for a cloud/test-provider-only gateway."""
+
+    def status(self) -> dict[str, object]:
+        return {"healthy": True, "local_backend": "not_configured", "current_model": None}
+
+    def complete(self, _request: InferenceRequest) -> InferenceResponse:
+        raise BackendError("local inference is not configured in cloud-only mode")
+
+    def stream(self, _request: InferenceRequest) -> Iterator[dict[str, object]]:
+        raise BackendError("local inference is not configured in cloud-only mode")
+        yield  # pragma: no cover
+
+    def shutdown(self) -> None:
+        return

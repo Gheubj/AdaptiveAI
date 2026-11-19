@@ -86,3 +86,28 @@ class AdaptiveAIClient:
                 if not line.startswith("data: ") or line == "data: [DONE]":
                     continue
                 yield json.loads(line[6:])
+
+    def route_explain(
+        self,
+        content: str,
+        *,
+        routing_mode: str = "auto",
+        provider_scope: str = "hybrid",
+        local_only: bool = False,
+        max_tokens: int = 64,
+        max_estimated_cost: float | None = None,
+    ) -> dict[str, object]:
+        response = httpx.post(
+            f"{self.base_url}/v1/route/explain",
+            json={
+                "messages": [{"role": "user", "content": content}],
+                "routing_mode": routing_mode,
+                "provider_scope": provider_scope,
+                "local_only": local_only,
+                "max_tokens": max_tokens,
+                "max_estimated_cost": max_estimated_cost,
+            },
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        return response.json()

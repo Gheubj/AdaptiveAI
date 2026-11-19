@@ -25,7 +25,10 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument("--port", type=int)
     command = sub.add_parser("chat")
     command.add_argument("prompt")
-    command.add_argument("--mode", choices=["fastest", "quality", "balanced", "hardware-aware"])
+    command.add_argument(
+        "--mode",
+        choices=["fastest", "quality", "balanced", "hardware-aware", "auto", "economy", "manual"],
+    )
     command.add_argument("--model")
     command.add_argument("--max-tokens", type=int, default=64)
     command.add_argument("--stream", action="store_true")
@@ -41,6 +44,17 @@ def parser() -> argparse.ArgumentParser:
     estimate.add_argument("--model", required=True)
     estimate.add_argument("--input-tokens", type=int, required=True)
     estimate.add_argument("--max-output-tokens", type=int, required=True)
+    route = sub.add_parser("route")
+    route_sub = route.add_subparsers(dest="route_command", required=True)
+    explain = route_sub.add_parser("explain")
+    explain.add_argument("prompt")
+    explain.add_argument("--mode", choices=["auto", "economy", "manual"], default="auto")
+    explain.add_argument("--scope", choices=["local", "cloud", "hybrid"], default="hybrid")
+    explain.add_argument("--provider")
+    explain.add_argument("--model")
+    explain.add_argument("--local-only", action="store_true")
+    explain.add_argument("--max-tokens", type=int, default=64)
+    explain.add_argument("--max-estimated-cost", type=float)
     command = sub.add_parser("import-archive")
     command.add_argument("archive", type=Path)
     command.add_argument("--raw-dir", type=Path)
@@ -124,6 +138,28 @@ def main(argv: list[str] | None = None) -> int:
     settings = Settings()
     product_config = load_product_config(args.config)
     configure_logging(product_config.log_level)
+    if args.command == "route":
+        from adaptiveai.auto_routing import AutoRoutingPolicy
+        from adaptiveai.public import ChatMessage, InferenceRequest, ProviderScope, RoutingMode
+
+        router = AutoRoutingPolicy(
+            product_config.auto_candidates,
+            default_candidate=product_config.auto_default_candidate,
+            uncertainty_policy=product_config.auto_uncertainty_policy,
+        )
+        request = InferenceRequest(
+            messages=(ChatMessage("user", args.prompt),),
+            model=args.model,
+            routing_mode=RoutingMode(args.mode),
+            provider_scope=ProviderScope(args.scope),
+            provider=args.provider,
+            local_only=args.local_only,
+            max_tokens=args.max_tokens,
+            max_estimated_cost=args.max_estimated_cost,
+        )
+        decision = router.explain(request)
+        print(decision.model_dump_json(indent=2))
+        return 0 if decision.status == "SELECTED" else 2
     if args.command == "providers":
         import os
 
@@ -432,9 +468,10 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(payload, indent=2))
     elif args.command in {"serve", "chat"}:
         from adaptiveai.api import ProductService, serve
+        from adaptiveai.auto_routing import AutoRoutingPolicy
         from adaptiveai.cloud import OpenAICompatibleProvider
         from adaptiveai.cloud_gateway import CloudGateway
-        from adaptiveai.lifecycle import ModelManager
+        from adaptiveai.lifecycle import CloudOnlyManager, ModelManager
         from adaptiveai.product_registry import ModelRegistry
         from adaptiveai.public import ChatMessage, InferenceRequest, ProviderScope, RoutingMode
         from adaptiveai.routing_engine import RoutingEngine, load_model_profiles
@@ -446,7 +483,29 @@ def main(argv: list[str] | None = None) -> int:
             if product_config.cloud_providers
             else None
         )
+        auto_router = AutoRoutingPolicy(
+            product_config.auto_candidates,
+            default_candidate=product_config.auto_default_candidate,
+            uncertainty_policy=product_config.auto_uncertainty_policy,
+        )
         scope = ProviderScope(args.scope) if args.command == "chat" else ProviderScope.LOCAL
+        auto_selection = None
+        if args.command == "chat" and args.mode in {"auto", "economy", "manual"}:
+            preflight = InferenceRequest(
+                messages=(ChatMessage("user", args.prompt),),
+                model=args.model,
+                routing_mode=RoutingMode(args.mode),
+                max_tokens=args.max_tokens,
+                stream=args.stream,
+                local_only=scope == ProviderScope.LOCAL,
+                provider_scope=scope,
+                provider=args.provider,
+                max_estimated_cost=args.max_estimated_cost,
+            )
+            auto_selection = auto_router.select(preflight)
+            args.model = auto_selection.request.model
+            args.provider = auto_selection.request.provider
+            scope = auto_selection.request.provider_scope
         cloud_chat = scope == ProviderScope.CLOUD or (
             scope == ProviderScope.HYBRID and args.provider is not None
         )
@@ -475,26 +534,40 @@ def main(argv: list[str] | None = None) -> int:
                 else:
                     response = gateway.complete(request)
                     print(response.text)
-                    print(json.dumps(response.diagnostics.__dict__, indent=2))
+                    diagnostics = response.diagnostics.__dict__
+                    if auto_selection:
+                        diagnostics = {
+                            **diagnostics,
+                            "explanation": auto_selection.decision.model_dump(mode="json"),
+                        }
+                    print(json.dumps(diagnostics, indent=2))
             finally:
                 gateway.close()
             return 0
 
-        registry = ModelRegistry(product_config.registry_path)
-        profiles_path = product_config.registry_path.with_name("local_model_profiles.json")
-        profiles = load_model_profiles(
-            profiles_path, tuple(model.model_id for model in registry.models())
-        )
-        router = RoutingEngine(
-            profiles, balanced_latency_weight=product_config.balanced_latency_weight
-        )
-        manager = ModelManager(
-            registry,
-            router,
-            product_config.backend_path,
-            keep_alive_seconds=product_config.keep_alive_seconds,
-            switch_hysteresis_seconds=product_config.switch_hysteresis_seconds,
-        )
+        if product_config.registry_path.is_file() and product_config.backend_path.is_file():
+            registry = ModelRegistry(product_config.registry_path)
+            profiles_path = product_config.registry_path.with_name("local_model_profiles.json")
+            profiles = load_model_profiles(
+                profiles_path, tuple(model.model_id for model in registry.models())
+            )
+            router = RoutingEngine(
+                profiles, balanced_latency_weight=product_config.balanced_latency_weight
+            )
+            manager = ModelManager(
+                registry,
+                router,
+                product_config.backend_path,
+                keep_alive_seconds=product_config.keep_alive_seconds,
+                switch_hysteresis_seconds=product_config.switch_hysteresis_seconds,
+            )
+        elif product_config.cloud_providers:
+            registry = None
+            manager = CloudOnlyManager()
+        else:
+            raise ValueError(
+                "local backend/registry unavailable and no cloud provider is configured"
+            )
         if args.command == "serve":
             updates = {}
             if args.host:
@@ -504,7 +577,7 @@ def main(argv: list[str] | None = None) -> int:
             runtime_config = product_config.__class__.model_validate(
                 {**product_config.model_dump(), **updates}
             )
-            service = ProductService(manager, registry, runtime_config, gateway)
+            service = ProductService(manager, registry, runtime_config, gateway, auto_router)
             print(
                 f"AdaptiveAI experimental server: http://{runtime_config.host}:{runtime_config.port}"
             )
@@ -532,7 +605,13 @@ def main(argv: list[str] | None = None) -> int:
                 else:
                     response = manager.complete(request)
                     print(response.text)
-                    print(json.dumps(response.diagnostics.__dict__, indent=2))
+                    diagnostics = response.diagnostics.__dict__
+                    if auto_selection:
+                        diagnostics = {
+                            **diagnostics,
+                            "explanation": auto_selection.decision.model_dump(mode="json"),
+                        }
+                    print(json.dumps(diagnostics, indent=2))
             finally:
                 manager.shutdown()
                 if gateway:

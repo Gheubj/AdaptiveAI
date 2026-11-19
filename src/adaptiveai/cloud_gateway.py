@@ -121,6 +121,7 @@ class CloudGateway:
                     or not request.fallback_models
                 ):
                     raise
+                self.ledger.release(estimate.amount if estimate else None)
                 model = request.fallback_models[0]
                 fallback_request = replace(request, model=model, fallback_models=())
                 provider, model = self._select(fallback_request)
@@ -213,6 +214,21 @@ class CloudGateway:
                     usage = dict(event["usage"])
                 yield {**event, "model": model}
         except GeneratorExit:
+            self.ledger.record(
+                UsageRecord(
+                    request_id,
+                    request.model or model,
+                    model,
+                    provider.provider_id,
+                    "interrupted",
+                    time.perf_counter() - started,
+                    None,
+                    None,
+                    "unreported",
+                    estimate.amount if estimate else None,
+                    None,
+                )
+            )
             return
         diagnostics = RoutingDiagnostics(
             model,

@@ -12,6 +12,9 @@ response bytes and timeouts are bounded, and no automatic paid retry is performe
 operators must additionally pin trusted provider domains and apply an egress firewall; application
 DNS validation alone cannot fully eliminate DNS rebinding/TOCTOU risk.
 
+Phase 7 makes this boundary executable: `strict_ssrf_protection=true` fails closed because the
+standard transport cannot pin the preflight address through connection establishment.
+
 Plain HTTP is accepted only in explicit developer mode for localhost/loopback. This is intended for
 local mock or compatible servers, never hosted multi-tenant deployment. Cancellation closes the
 upstream stream where supported; it is not a promise that a provider will stop billing.

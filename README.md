@@ -18,6 +18,8 @@ AdaptiveAI is not a proven universal inference optimizer and is not production h
 - preserved reproducible research infrastructure from Phases 1–4.5
 - provider-independent BYOK cloud access with explicit provider/model selection, streaming,
   typed errors, pricing metadata, and pre-request budgets (Phase 6G development branch)
+- explainable deterministic Auto V0, Economy/Manual policies, dry-run routing, and a zero-cost
+  localhost test provider (Phase 7 development branch)
 
 ## Installation
 
@@ -58,6 +60,9 @@ Provider inspection, startup, `doctor`, and model discovery do not generate comp
 deployment-specific; unknown pricing is never treated as zero. No cloud call is made while
 `local_only` is true.
 
+The fully offline Developer Alpha walkthrough is in
+[`docs/DEVELOPER_ALPHA_QUICKSTART.md`](docs/DEVELOPER_ALPHA_QUICKSTART.md).
+
 ```bash
 curl http://127.0.0.1:8088/v1/chat/completions \
   -H 'Content-Type: application/json' \
@@ -79,6 +84,10 @@ print(response["routing"])
 - **Balanced:** maximizes `quality - latency_weight × predicted_p95_latency`.
 - **Hardware-Aware:** experimental quality selection after privacy, RAM, latency, and availability
   constraints.
+- **Auto V0:** compatible category evidence after hard eligibility, otherwise explicit abstention or
+  configured default; not a learned or validated router.
+- **Economy:** lowest known estimated cost among eligible deployments.
+- **Manual:** explicit deployment validated against the same hard constraints.
 
 Explicit `model=<id>` bypasses routing but never hard feasibility constraints. Profiles are
 host/workload specific. Unknown values remain unknown; AdaptiveAI does not invent quality scores.

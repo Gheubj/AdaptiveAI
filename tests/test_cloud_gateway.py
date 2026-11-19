@@ -13,7 +13,9 @@ from adaptiveai.client import AdaptiveAIClient
 from adaptiveai.cloud import (
     AuthenticationError,
     BudgetError,
+    BudgetLedger,
     CloudProviderConfig,
+    CostEstimate,
     DeterministicOpenAITransport,
     MalformedResponseError,
     ModelPricing,
@@ -91,6 +93,8 @@ def test_configuration_endpoint_and_capability_guards():
         )
     with pytest.raises(ValueError, match="allowlisted"):
         validate_endpoint(provider_config(allowed_hosts=()), resolver=public_resolver)
+    with pytest.raises(ValueError, match="connection-pinned"):
+        validate_endpoint(provider_config(strict_ssrf_protection=True), resolver=public_resolver)
     local = provider_config(
         base_url="http://localhost:8080",
         hosted_mode=False,
@@ -167,6 +171,17 @@ def test_gateway_scope_budget_accounting_and_unknown_pricing(monkeypatch):
     assert response.diagnostics.actual_cost == pytest.approx(0.000006)
     assert gateway.ledger.records[-1].usage_source == "provider"
     gateway.close()
+
+
+def test_budget_reservation_prevents_concurrent_oversubscription():
+    ledger = BudgetLedger(max_total=1.5)
+    estimate = CostEstimate("m", "USD", 1, 1, 1.0, "fixture", "2026-11-19")
+    ledger.authorize(estimate, None)
+    assert ledger.reserved == 1
+    with pytest.raises(BudgetError, match="total budget"):
+        ledger.authorize(estimate, None)
+    ledger.release(estimate.amount)
+    assert ledger.reserved == 0
 
 
 def test_explicit_fallback_only_after_unsupported_model(monkeypatch):

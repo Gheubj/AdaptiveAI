@@ -8,6 +8,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from adaptiveai.auto_routing import AutoCandidate
 from adaptiveai.cloud import CloudProviderConfig
 
 
@@ -56,11 +57,14 @@ class ProductConfig(BaseModel):
     log_level: str = "INFO"
     research_logging: bool = False
     cloud_providers: tuple[CloudProviderConfig, ...] = ()
+    auto_candidates: tuple[AutoCandidate, ...] = ()
+    auto_default_candidate: str | None = None
+    auto_uncertainty_policy: str = "error"
 
     @field_validator("default_routing_mode")
     @classmethod
     def validate_mode(cls, value: str) -> str:
-        allowed = {"fastest", "quality", "balanced", "hardware-aware"}
+        allowed = {"fastest", "quality", "balanced", "hardware-aware", "auto", "economy", "manual"}
         if value not in allowed:
             raise ValueError(f"must be one of {sorted(allowed)}")
         return value
